@@ -5,7 +5,7 @@ CC = gcc
 CFLAGS = -Wall -I./src/unix -I./src/core
 
 # 定义链接选项
-LDFLAGS = 
+LDFLAGS = -pthread
 
 # 定义库的名称
 LIB_NAME = libnv
@@ -30,29 +30,30 @@ OBJS = $(SRCS:.c=.o)
 OBJS_SHARED = $(OBJS:.o=.os)
 
 # 默认目标
-all: $(STATIC_LIB_FILE) $(SHARED_LIB_FILE) $(TEST_PROG)
+all: $(STATIC_LIB_FILE) $(SHARED_LIB_FILE) 
+#$(TEST_PROG)
 
 # 编译静态库
 $(STATIC_LIB_FILE): $(OBJS)
 	@mkdir -p $(LIB_PATH)
-	ar rcs $@ $^
+	ar rcs $@ $^ 
 
 # 编译动态库
 $(SHARED_LIB_FILE): $(OBJS_SHARED)
-	@mkdir -p $(LIB_PATH)
-	$(CC) -shared -o $@ $^
+	@mkdir -p $(LIB_PATH) 
+	$(CC) -shared -o $@ $^ 
 
 # 编译可执行文件
-$(TEST_PROG): $(wildcard ./test/*.c) $(SHARED_LIB_FILE)
-	$(CC) $(CFLAGS) -L$(LIB_PATH) -lnv -o $@ ./test/*.c
+#$(TEST_PROG): $(wildcard ./test/*.c) $(SHARED_LIB_FILE)
+#	$(CC) $(CFLAGS) $(LDFLAGS) -L$(LIB_PATH) -lnv -o $@ ./test/*.c
 
 # 编译 .c 文件为 .o 文件的规则（静态库）
 %.o: %.c
-	$(CC) $(CFLAGS) -c $< -o $@
+	$(CC) $(CFLAGS) $(LDFLAGS) -c $< -o $@
 
 # 编译 .c 文件为 .os 文件的规则（动态库）
 %.os: %.c
-	$(CC) $(CFLAGS) -fPIC -c $< -o $@
+	$(CC) $(CFLAGS) $(LDFLAGS) -fPIC -c $< -o $@
 
 # 清理编译生成的文件
 clean:

@@ -22,7 +22,7 @@ nv_shm_alloc(nv_shm_t *shm)
                                 MAP_ANON|MAP_SHARED, -1, 0);
 
     if (shm->addr == MAP_FAILED) {
-        nv_log_error(shm->log, "mmap(MAP_ANON|MAP_SHARED, %uz) failed", shm->size);
+       // nv_log_error(shm->log, "mmap(MAP_ANON|MAP_SHARED, %uz) failed", shm->size);
         return NV_ERROR;
     }
 
@@ -34,7 +34,7 @@ void
 nv_shm_free(nv_shm_t *shm)
 {
     if (munmap((void *) shm->addr, shm->size) == -1) {
-        nv_log_error(shm->log,"munmap(%p, %uz) failed", shm->addr, shm->size);
+        //nv_log_error(shm->log,"munmap(%p, %uz) failed", shm->addr, shm->size);
     }
 }
 
@@ -48,8 +48,8 @@ nv_shm_alloc(nv_shm_t *shm)
     fd = open("/dev/zero", O_RDWR);
 
     if (fd == -1) {
-        ngx_log_error(NV_LOG_ERROR, shm->log, nv_errno,
-                      "open(\"/dev/zero\") failed");
+        //ngx_log_error(NV_LOG_ERROR, shm->log, nv_errno,
+        //              "open(\"/dev/zero\") failed");
         return NV_ERROR;
     }
 
@@ -57,13 +57,13 @@ nv_shm_alloc(nv_shm_t *shm)
                                 MAP_SHARED, fd, 0);
 
     if (shm->addr == MAP_FAILED) {
-        ngx_log_error(NV_LOG_ERROR, shm->log, ngx_errno,
+        //ngx_log_error(NV_LOG_ERROR, shm->log, ngx_errno,
                       "mmap(/dev/zero, MAP_SHARED, %uz) failed", shm->size);
     }
 
     if (close(fd) == -1) {
-        ngx_log_error(NV_LOG_ERROR, shm->log, ngx_errno,
-                      "close(\"/dev/zero\") failed");
+       // ngx_log_error(NV_LOG_ERROR, shm->log, ngx_errno,
+        //              "close(\"/dev/zero\") failed");
     }
 
     return (shm->addr == MAP_FAILED) ? NGX_ERROR : NGX_OK;
