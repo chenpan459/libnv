@@ -1,0 +1,8 @@
+
+[2024-10-28 02:43:40][INFO] ====== NV Log system initialized ======
+[2024-10-28 02:43:40][DEBUG][140414690785088][benchmark_nv.c:21][main] 这是一条调试信息
+[2024-10-28 02:43:40][INFO][140414690785088][benchmark_nv.c:22][main] 系统启动，版本号: 1.0.0
+[2024-10-28 02:43:40][WARN][140414690785088][benchmark_nv.c:23][main] 内存使用率: 85%
+[2024-10-28 02:43:40][ERROR][140414690785088][benchmark_nv.c:24][main] 文件打开失败: config.json
+[2024-10-28 02:43:40][FATAL][140414690785088][benchmark_nv.c:25][main] 系统崩溃
+[2024-10-28 02:43:40][INFO] ====== NV Log system closed ======
