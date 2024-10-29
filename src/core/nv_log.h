@@ -1,9 +1,4 @@
 
-/*
- * Copyright (C) Igor Sysoev
- * Copyright (C) nvlog, Inc.
- */
-
 
 #ifndef _NV_LOG_H_INCLUDED_
 #define _NV_LOG_H_INCLUDED_

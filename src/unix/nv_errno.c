@@ -1,15 +1,12 @@
 
-/*
- * Copyright (C) Igor Sysoev
- * Copyright (C) Nginx, Inc.
- */
+
 
 
 #include <nv_linux_config.h>
 
 
 #if 0
-static ngx_str_t   ngx_unknown_error = ngx_string("Unknown error");
+static nv_str_t   ngx_unknown_error = ngx_string("Unknown error");
 
 
 #if (NGX_HAVE_STRERRORDESC_NP)

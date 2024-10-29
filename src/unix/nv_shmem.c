@@ -1,14 +1,13 @@
 
-/*
- * Copyright (C) Igor Sysoev
- * Copyright (C) Nginx, Inc.
- */
+
 
 
 #include <nv_linux_config.h>
 #include <nv_config.h>
 #include <nv_core.h>
 #include <nv_shmem.h>
+#include <nv_log.h>
+
 
 #define NV_HAVE_MAP_ANON 1
 
@@ -22,7 +21,7 @@ nv_shm_alloc(nv_shm_t *shm)
                                 MAP_ANON|MAP_SHARED, -1, 0);
 
     if (shm->addr == MAP_FAILED) {
-       // nv_log_error(shm->log, "mmap(MAP_ANON|MAP_SHARED, %uz) failed", shm->size);
+        nv_log_error("mmap(MAP_ANON|MAP_SHARED, %uz) failed", shm->size);
         return NV_ERROR;
     }
 
@@ -34,11 +33,11 @@ void
 nv_shm_free(nv_shm_t *shm)
 {
     if (munmap((void *) shm->addr, shm->size) == -1) {
-        //nv_log_error(shm->log,"munmap(%p, %uz) failed", shm->addr, shm->size);
+        nv_log_error("munmap(%p, %uz) failed", shm->addr, shm->size);
     }
 }
 
-#elif (NGX_HAVE_MAP_DEVZERO)
+#elif (NV_HAVE_MAP_DEVZERO)
 
 nv_int_t
 nv_shm_alloc(nv_shm_t *shm)
@@ -48,8 +47,8 @@ nv_shm_alloc(nv_shm_t *shm)
     fd = open("/dev/zero", O_RDWR);
 
     if (fd == -1) {
-        //ngx_log_error(NV_LOG_ERROR, shm->log, nv_errno,
-        //              "open(\"/dev/zero\") failed");
+        nv_log_error(nv_errno,
+                      "open(\"/dev/zero\") failed");
         return NV_ERROR;
     }
 
@@ -57,13 +56,11 @@ nv_shm_alloc(nv_shm_t *shm)
                                 MAP_SHARED, fd, 0);
 
     if (shm->addr == MAP_FAILED) {
-        //ngx_log_error(NV_LOG_ERROR, shm->log, ngx_errno,
-                      "mmap(/dev/zero, MAP_SHARED, %uz) failed", shm->size);
+        nv_log_error("mmap(/dev/zero, MAP_SHARED, %uz) failed", shm->size);
     }
 
     if (close(fd) == -1) {
-       // ngx_log_error(NV_LOG_ERROR, shm->log, ngx_errno,
-        //              "close(\"/dev/zero\") failed");
+       nv_log_error("close(\"/dev/zero\") failed");
     }
 
     return (shm->addr == MAP_FAILED) ? NGX_ERROR : NGX_OK;
@@ -79,7 +76,7 @@ ngx_shm_free(ngx_shm_t *shm)
     }
 }
 
-#elif (NGX_HAVE_SYSVSHM)
+#elif (NV_HAVE_SYSVSHM)
 
 #include <sys/ipc.h>
 #include <sys/shm.h>

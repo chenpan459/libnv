@@ -1,12 +1,11 @@
 
-/*
- * Copyright (C) Igor Sysoev
- * Copyright (C) Nginx, Inc.
- */
+
 
 
 #ifndef _NV_ALLOC_H_INCLUDED_
 #define _NV_ALLOC_H_INCLUDED_
+
+#include <nv_linux_config.h>
 
 #if 0
 #include <nv_config.h>

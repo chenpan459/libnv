@@ -1,8 +1,5 @@
 
-/*
- * Copyright (C) Igor Sysoev
- * Copyright (C) Nginx, Inc.
- */
+
 #if 0
 
 #include <ngx_config.h>

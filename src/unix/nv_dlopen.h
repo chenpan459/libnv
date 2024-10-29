@@ -1,13 +1,9 @@
 
-/*
- * Copyright (C) Maxim Dounin
- * Copyright (C) Nginx, Inc.
- */
-
 
 #ifndef _NGX_DLOPEN_H_INCLUDED_
 #define _NGX_DLOPEN_H_INCLUDED_
 
+#include <nv_linux_config.h>
 
 #include <nv_config.h>
 #include <nv_core.h>

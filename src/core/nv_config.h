@@ -1,8 +1,4 @@
 
-/*
- * Copyright (C) Igor Sysoev
- * Copyright (C) Nginx, Inc.
- */
 
 
 #ifndef _NV_CONFIG_H_INCLUDED_
@@ -10,7 +6,6 @@
 
 
 //#include <ngx_auto_headers.h>
-#include <nv_config.h>
 #include <stdint.h>
 
 

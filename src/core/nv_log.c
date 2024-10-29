@@ -1,7 +1,4 @@
-/*
- * Copyright (C) Igor Sysoev
- * Copyright (C) Nginx, Inc.
- */
+
 #include <nv_config.h>
 #include <nv_core.h>
 #include <stdlib.h>
@@ -27,7 +24,7 @@ static const char* nv_level_strings[] = {
 // 定义日志颜色（ANSI转义序列）
 static const char* nv_level_colors[] = {
     "\x1b[36m",  // DEBUG - 青色
-    "\x1b[32m",  // INFO - 绿色
+    "\x1b[37m",   // WHITE - 白色//"\x1b[32m",  // INFO - 绿色
     "\x1b[33m",  // WARN - 黄色
     "\x1b[31m",  // ERROR - 红色
     "\x1b[35m"   // FATAL - 紫色

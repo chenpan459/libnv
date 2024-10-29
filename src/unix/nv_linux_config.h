@@ -1,9 +1,4 @@
 
-/*
- * Copyright (C) Igor Sysoev
- * Copyright (C) Nginx, Inc.
- */
-
 
 #ifndef _NV_LINUX_CONFIG_H_INCLUDED_
 #define _NV_LINUX_CONFIG_H_INCLUDED_

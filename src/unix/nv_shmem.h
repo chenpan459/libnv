@@ -1,8 +1,4 @@
 
-/*
- * Copyright (C) Igor Sysoev
- * Copyright (C) Nginx, Inc.
- */
 
 
 #ifndef _NV_SHMEM_H_INCLUDED_

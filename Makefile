@@ -8,7 +8,7 @@ CFLAGS = -Wall
 LDFLAGS = 
 
 # 定义需要构建的子目录
-SUBDIRS = src test
+SUBDIRS = src examples
 
 # 默认目标
 all: $(SUBDIRS)
