@@ -3,7 +3,7 @@
 
 
 /* Open a socket in non-blocking close-on-exec mode, atomically if possible. */
-int uv__socket(int domain, int type, int protocol) {
+int uv_socket_create(int domain, int type, int protocol) {
   int sockfd;
   int err;
 
@@ -38,6 +38,34 @@ int uv__socket(int domain, int type, int protocol) {
 
   return sockfd;
 }
+
+int nv_socket_bind()
+{
+   return 0;
+}
+
+int nv_socket_listen()
+{
+   return 0;
+}
+
+
+int nv_socket_accept()
+{
+   return 0;
+}
+
+
+int nv_socket_read()
+{
+   return 0;
+}
+
+int nv_socket_write()
+{
+   return 0;
+}
+
 
 
 
