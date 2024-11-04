@@ -1,5 +1,14 @@
+/************************************************
+ * @文件名: nv_socket.c
+ * @功能: Socket库类型定义头文件
+ * @作者: chenpan
+ * @日期: 2024-11-04
+ * 
+ ***********************************************/
 
 #include <nv_socket.h>
+
+typedef int  socket_fd;
 
 
 /* Open a socket in non-blocking close-on-exec mode, atomically if possible. */
@@ -39,32 +48,44 @@ int uv_socket_create(int domain, int type, int protocol) {
   return sockfd;
 }
 
-int nv_socket_bind()
+int nv_socket_bind(socket_fd fd)
 {
    return 0;
 }
 
-int nv_socket_listen()
-{
-   return 0;
-}
-
-
-int nv_socket_accept()
+int nv_socket_listen(socket_fd fd)
 {
    return 0;
 }
 
 
-int nv_socket_read()
+int nv_socket_accept(socket_fd fd)
 {
    return 0;
 }
 
-int nv_socket_write()
+int nv_socket_connet(socket_fd fd)
 {
    return 0;
 }
+
+
+int nv_socket_rcv(socket_fd fd)
+{
+   return 0;
+}
+
+int nv_socket_send(socket_fd fd)
+{
+   return 0;
+}
+
+
+int nv_socket_close(socket_fd fd)
+{
+   return 0;
+}
+
 
 
 
