@@ -12,7 +12,7 @@ typedef int  socket_fd;
 
 
 /* Open a socket in non-blocking close-on-exec mode, atomically if possible. */
-int uv_socket_create(int domain, int type, int protocol) {
+int nv_socket_create(int domain, int type, int protocol) {
   int sockfd;
   int err;
 
@@ -83,7 +83,7 @@ int nv_socket_send(socket_fd fd)
 
 int nv_socket_close(socket_fd fd)
 {
-   return 0;
+   return  close(socket);
 }
 
 
