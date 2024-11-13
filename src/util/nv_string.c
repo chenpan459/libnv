@@ -58,4 +58,12 @@ int nv_str_tolower(char *str) {
     return 0;
 }
 
-
+/********************************
+ * 个不限参数的函数来格式化输出字符串
+ * ***************************************/
+void format_string(char *buffer, size_t bufsize, const char *format, ...) {
+    va_list args;
+    va_start(args, format);
+    vsnprintf(buffer, bufsize, format, args);
+    va_end(args);
+}
