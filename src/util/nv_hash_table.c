@@ -97,3 +97,26 @@ void nv_hash_table_destroy(HashTable* table) {
     free(table);
 }
 
+
+
+int nv_hash_table_main()
+{
+
+    
+    HashTable* table = nv_hash_table_create(HASH_SIZE);
+
+    nv_hash_table_insert(table, "key1", "value1");
+    nv_hash_table_insert(table, "key2", "value2");
+    nv_hash_table_insert(table, "key3", "value3");
+
+    printf("key1: %s\n", nv_hash_table_find(table, "key1"));
+    printf("key2: %s\n", nv_hash_table_find(table, "key2"));
+    printf("key3: %s\n", nv_hash_table_find(table, "key3"));
+
+    nv_hash_table_delete(table, "key2");
+
+    printf("key2: %s\n", nv_hash_table_find(table, "key2"));
+
+    nv_hash_table_destroy(table);
+    return 0;
+}

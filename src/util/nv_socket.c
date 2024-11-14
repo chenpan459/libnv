@@ -137,3 +137,16 @@ void run_tcp_client(const char* server_ip, int server_port) {
 }
 
 
+
+int nv_socket_main()
+{
+
+   // 运行 TCP 服务器（在单独的终端中执行）
+    // run_tcp_server("127.0.0.1", 8080);
+
+    // 运行 TCP 客户端
+    run_tcp_client("127.0.0.1", 8080);
+
+
+    return 0;
+}

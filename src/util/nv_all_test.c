@@ -13,6 +13,8 @@
 #include "nv_thread.h"
 #include "nv_signal.h"
 #include "nv_lock.h"
+#include "nv_base64.h"
+
 
 
 
@@ -26,7 +28,7 @@
 #define NV_FILE_DEBUG 0
 #define NV_FORK_DEBUG 0
 #define NV_DEBUG_LIST 0
-#define NV_LOCK_DEBUG 1
+#define NV_LOCK_DEBUG 0
 
 // 示例线程函数
 void* thread_function(void* arg) {
@@ -56,59 +58,30 @@ void critical_section() {
 
 int main() {
 
+    nv_time_main();
+    
+    nv_base64_main();
  
 #if  CALCULATE_MD5
-    char md5_hash[33];
-    char * fileName ="./nv_md5.c";
-    if (nv_calculate_file_md5(fileName, md5_hash) == 0) {
-        printf("%s 的MD5值: %s\n", fileName, md5_hash);
-    }
+     nv_md5_main();
 #endif 
 
 
-
 #if NV_HASH_TABLE
-
-    HashTable* table = nv_hash_table_create(HASH_SIZE);
-
-    nv_hash_table_insert(table, "key1", "value1");
-    nv_hash_table_insert(table, "key2", "value2");
-    nv_hash_table_insert(table, "key3", "value3");
-
-    printf("key1: %s\n", nv_hash_table_find(table, "key1"));
-    printf("key2: %s\n", nv_hash_table_find(table, "key2"));
-    printf("key3: %s\n", nv_hash_table_find(table, "key3"));
-
-    nv_hash_table_delete(table, "key2");
-
-    printf("key2: %s\n", nv_hash_table_find(table, "key2"));
-
-    nv_hash_table_destroy(table);
-
+     nv_hash_table_main();
 
 #endif
 
-
-
-
 #if NV_SOCKET_DEBUG
-   // 运行 TCP 服务器（在单独的终端中执行）
-    // run_tcp_server("127.0.0.1", 8080);
-
-    // 运行 TCP 客户端
-    run_tcp_client("127.0.0.1", 8080);
-
-
-
+   nv_socket_main();
 #endif 
 
 
 #if NV_RB_THREAD_DEBUG
+
     pthread_t threads[5];
     int thread_args[5];
     pthread_attr_t attr;
-
-
 
     // 初始化线程属性
     if (nv_init_thread_attr(&attr, PTHREAD_CREATE_JOINABLE, 0) != 0) {
@@ -145,27 +118,7 @@ int main() {
 
 
 #if NV_RB_TREE_DEBUG
-
-    nv_rb_Node* root = NULL;
-    root = nv_rb_insert(root, 7);
-    root = nv_rb_insert(root, 6);
-    root = nv_rb_insert(root, 5);
-    root = nv_rb_insert(root, 4);
-    root = nv_rb_insert(root, 3);
-    root = nv_rb_insert(root, 2);
-    root = nv_rb_insert(root, 1);
-
-    printf("中序遍历结果: ");
-    nv_rb_inorder(root);
-
-    int num = 4;
-    nv_rb_Node* res = nv_rb_search(root, num);
-    if (res != NULL)
-        printf("\n元素 %d 在树中\n", num);
-    else
-        printf("\n元素 %d 不在树中\n", num);
-
-    return 0;
+nv_rb_main();
 
 #endif
 
@@ -200,23 +153,8 @@ int main() {
 #endif
 
 #if NV_FILE_DEBUG
+   nv_file_main();
 
-    const char* filename = "example.txt";
-    FILE* file = nv_open_file(filename, "w");
-    if (file != NULL) {
-        const char* text = "Hello, World!";
-        nv_write_file(text, sizeof(char), 13, file);
-        nv_close_file(file);
-    }
-
-    file = nv_open_file(filename, "r");
-    if (file != NULL) {
-        char buffer[100];
-        nv_read_file(buffer, sizeof(char), 13, file);
-        buffer[13] = '\0'; // 确保字符串以空字符结尾
-        printf("读取到的内容: %s\n", buffer);
-        nv_close_file(file);
-    }
 
 #endif
 
@@ -248,25 +186,8 @@ int main() {
 
 
 #if NV_DEBUG_LIST
-
-    nv_list_Node* head = NULL;
-
-    head = nv_list_insertEnd(head, 1);
-    head = nv_list_insertEnd(head, 2);
-    head = nv_list_insertEnd(head, 3);
-    head = nv_list_insertEnd(head, 4);
-
-    printf("链表内容: ");
-    nv_list_printList(head);
-
-    head = nv_list_deleteNode(head, 3);
-    printf("删除节点 3 后的链表: ");
-    nv_list_printList(head);
-
-
+nv_list_main();
 #endif
-
-
 
 
 #if NV_LOCK_DEBUG
@@ -298,6 +219,8 @@ int main() {
 
 #endif
     return 0;
+
+    
 }
 
 

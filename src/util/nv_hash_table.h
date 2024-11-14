@@ -4,6 +4,11 @@
 #include <stdlib.h>
 #include <string.h>
 
+
+#ifdef __cplusplus
+extern "C" {
+#endif
+
 #define HASH_SIZE 100  // 哈希表大小
 
 
@@ -32,6 +37,6 @@ void nv_hash_table_destroy(HashTable* table);
 
 
 
-
+int nv_hash_table_main();
 
 #endif 

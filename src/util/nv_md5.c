@@ -179,3 +179,16 @@ int nv_calculate_file_md5(const char *filename, char *output) {
     return 0;
 }
 
+
+
+int nv_md5_main()
+{
+
+
+    char md5_hash[33];
+    char * fileName ="./nv_md5.c";
+    if (nv_calculate_file_md5(fileName, md5_hash) == 0) {
+        printf("%s 的MD5值: %s\n", fileName, md5_hash);
+    }
+    return 0;
+}

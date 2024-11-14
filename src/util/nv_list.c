@@ -65,3 +65,24 @@ void nv_list_printList(nv_list_Node* head) {
     }
     printf("\n");
 }
+
+
+int nv_list_main(){
+
+
+    nv_list_Node* head = NULL;
+
+    head = nv_list_insertEnd(head, 1);
+    head = nv_list_insertEnd(head, 2);
+    head = nv_list_insertEnd(head, 3);
+    head = nv_list_insertEnd(head, 4);
+
+    printf("链表内容: ");
+    nv_list_printList(head);
+
+    head = nv_list_deleteNode(head, 3);
+    printf("删除节点 3 后的链表: ");
+    nv_list_printList(head);
+
+    return 0;
+}

@@ -175,3 +175,29 @@ void nv_rb_inorder(nv_rb_Node* root) {
 
 
 
+
+int nv_rb_main(){
+
+    nv_rb_Node* root = NULL;
+    root = nv_rb_insert(root, 7);
+    root = nv_rb_insert(root, 6);
+    root = nv_rb_insert(root, 5);
+    root = nv_rb_insert(root, 4);
+    root = nv_rb_insert(root, 3);
+    root = nv_rb_insert(root, 2);
+    root = nv_rb_insert(root, 1);
+
+    printf("中序遍历结果: ");
+    nv_rb_inorder(root);
+
+    int num = 4;
+    nv_rb_Node* res = nv_rb_search(root, num);
+    if (res != NULL)
+        printf("\n元素 %d 在树中\n", num);
+    else
+        printf("\n元素 %d 不在树中\n", num);
+
+    return 0;
+    
+}
+

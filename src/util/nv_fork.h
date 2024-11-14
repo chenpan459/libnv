@@ -1,6 +1,9 @@
 #ifndef _NV_FORK_H_INCLUDED_
 #define _NV_FORK_H_INCLUDED_
 
+#ifdef __cplusplus
+extern "C" {
+#endif
 #include "nv_util_include.h"
 
 
@@ -11,5 +14,10 @@ pid_t nv_create_process(process_func_t func) ;
 
 int nv_wait_process(pid_t pid) ;
 int nv_create_daemon() ;
+
+
+#ifdef __cplusplus
+}
+#endif
 
 #endif 

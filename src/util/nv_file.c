@@ -43,3 +43,26 @@ int nv_close_file(FILE* file) {
 }
 
 
+int nv_file_main()
+{
+    const char* filename = "example.txt";
+    FILE* file = nv_open_file(filename, "w");
+    if (file != NULL) {
+        const char* text = "Hello, World!";
+        nv_write_file(text, sizeof(char), 13, file);
+        nv_close_file(file);
+    }
+
+    file = nv_open_file(filename, "r");
+    if (file != NULL) {
+        char buffer[100];
+        nv_read_file(buffer, sizeof(char), 13, file);
+        buffer[13] = '\0'; // 确保字符串以空字符结尾
+        printf("读取到的内容: %s\n", buffer);
+        nv_close_file(file);
+    }
+
+    return 0;
+}
+
+

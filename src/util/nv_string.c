@@ -8,8 +8,6 @@ char *nv_strrchr(const char *str, int c)
      return  strrchr(str, c);
 }
 
-
-
 /**************************************
  * 字符串比较大小
  * *****************************/
@@ -17,7 +15,6 @@ int nv_strcmp(char *str1,char * str2 ) {
 
     return strcmp(str1, str2);
 }
-
 
 
 /**************************************
@@ -61,9 +58,36 @@ int nv_str_tolower(char *str) {
 /********************************
  * 个不限参数的函数来格式化输出字符串
  * ***************************************/
-void format_string(char *buffer, size_t bufsize, const char *format, ...) {
+void nv_format_string(char *buffer, size_t bufsize, const char *format, ...) {
     va_list args;
     va_start(args, format);
     vsnprintf(buffer, bufsize, format, args);
     va_end(args);
 }
+
+
+/**************************************
+ * 字符串拷贝
+ * *****************************/
+char* nv_strcpy(char *str1,char * str2 ) {
+
+    return strcpy(str1, str2);
+}
+
+
+/**************************************
+ * 内存拷贝
+ * *****************************/
+void* nv_memcpy(void *dest,void * src,size_t  n ) {
+
+    return memcpy(dest, src,n);
+}
+
+void* nv_memset(void *dest,int a,size_t  n ) {
+
+    return memset(dest, a,n);
+}
+
+
+
+
