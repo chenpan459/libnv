@@ -14,7 +14,12 @@
 #include "nv_signal.h"
 #include "nv_lock.h"
 #include "nv_base64.h"
-
+#include "nv_thread_pool.h"
+#include "nv_message_queue.h"
+#include "nv_fifo.h"
+#include "nv_pipe.h"
+#include "nv_semaphore.h"
+#include "nv_shm.h"
 
 
 
@@ -58,9 +63,17 @@ void critical_section() {
 
 int main() {
 
-    nv_time_main();
+    //nv_time_main();    
+    //nv_base64_main();
+    //nv_thread_pool_main();    
+    //message_queue_main();
+
+    //nv_fifo_main();
+    //nv_pipe_main() ;
     
-    nv_base64_main();
+    //nv_semaphore_main();
+
+    nv_shm_main() ;
  
 #if  CALCULATE_MD5
      nv_md5_main();

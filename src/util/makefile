@@ -5,7 +5,7 @@ CC = gcc
 CFLAGS = -Wall -g
 
 # 定义链接选项
-LDFLAGS = -lpthread
+LDFLAGS = -lpthread -lrt
 
 # 找出所有的.c文件
 SRCS = $(wildcard *.c)

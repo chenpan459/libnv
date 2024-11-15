@@ -5,7 +5,7 @@ CC = gcc
 CFLAGS = -Wall -I./unix -I./core
 
 # 定义链接选项
-LDFLAGS = -pthread
+LDFLAGS = -pthread -lrt
 
 # 定义库的名称
 LIB_NAME = libnv
