@@ -30,6 +30,7 @@
 #include <arpa/inet.h> // 为了使用 inet_ntoa
 #include <sys/select.h>
 #include <sys/poll.h>
+#include <termios.h>
 
 
 
