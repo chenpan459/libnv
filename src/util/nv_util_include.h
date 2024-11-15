@@ -24,6 +24,16 @@
 #include <semaphore.h>
 #include <errno.h>
 #include <sys/mman.h>
+#include <sys/epoll.h>
+#include <sys/socket.h>
+#include <netinet/in.h>
+#include <arpa/inet.h> // 为了使用 inet_ntoa
+#include <sys/select.h>
+#include <sys/poll.h>
+
+
+
+
 
 
 #endif

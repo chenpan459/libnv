@@ -20,7 +20,9 @@
 #include "nv_pipe.h"
 #include "nv_semaphore.h"
 #include "nv_shm.h"
-
+#include "nv_socket_epoll.h"
+#include "nv_socket_poll.h"
+#include "nv_socket_select.h"
 
 
 
@@ -67,27 +69,19 @@ int main() {
     //nv_base64_main();
     //nv_thread_pool_main();    
     //message_queue_main();
-
     //nv_fifo_main();
-    //nv_pipe_main() ;
-    
+    //nv_pipe_main() ;    
     //nv_semaphore_main();
-
-    nv_shm_main() ;
+    //nv_shm_main() ;
+    //nv_epoll_main() ;
+    nv_poll_main() ;
  
-#if  CALCULATE_MD5
-     nv_md5_main();
-#endif 
-
-
-#if NV_HASH_TABLE
-     nv_hash_table_main();
-
-#endif
-
-#if NV_SOCKET_DEBUG
-   nv_socket_main();
-#endif 
+     //nv_md5_main();
+//    nv_hash_table_main();
+//   nv_socket_main();
+//   nv_rb_main();
+  // nv_file_main();
+///   nv_list_main();
 
 
 #if NV_RB_THREAD_DEBUG
@@ -128,14 +122,6 @@ int main() {
 #endif
 
 
-
-
-#if NV_RB_TREE_DEBUG
-nv_rb_main();
-
-#endif
-
-
 #if NV_SIGNAL_DEBUG
 
     pid_t pid = getpid();
@@ -165,11 +151,6 @@ nv_rb_main();
 
 #endif
 
-#if NV_FILE_DEBUG
-   nv_file_main();
-
-
-#endif
 
 
 #if NV_FORK_DEBUG
@@ -198,9 +179,7 @@ nv_rb_main();
 
 
 
-#if NV_DEBUG_LIST
-nv_list_main();
-#endif
+
 
 
 #if NV_LOCK_DEBUG
