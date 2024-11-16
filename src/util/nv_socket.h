@@ -1,11 +1,19 @@
 #ifndef _NV_SOCKET_H_INCLUDED_
 #define _NV_SOCKET_H_INCLUDED_
-#include <stdio.h>
-#include <stdlib.h>
-#include <string.h>
-#include <unistd.h>
-#include <arpa/inet.h>
 
 
+#include "nv_util_include.h"
+
+int nv_tcp_socket_create() ;
+int nv_udp_socket_create() ;
+int nv_socket_bind(int sockfd, const char* ip, int port) ;
+int nv_tcp_socket_listen(int sockfd, int backlog) ;
+int nv_tcp_socket_accept(int sockfd) ;
+int nv_tcp_socket_connect(int sockfd, const char* ip, int port);
+ssize_t nv_socket_send(int sockfd, const void* buffer, size_t length, int flags) ;
+ssize_t nv_socket_recv(int sockfd, void* buffer, size_t length, int flags) ;
+int nv_socket_close(int sockfd) ;
+void run_tcp_server(const char* ip, int port) ;
+void run_tcp_client(const char* server_ip, int server_port) ;
 
 #endif

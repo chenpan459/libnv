@@ -1,8 +1,6 @@
 #ifndef _NV_FILE_H_INCLUDED_
 #define _NV_FILE_H_INCLUDED_
-#include <stdio.h>
-#include <stdio.h>
-#include <stdlib.h>
+#include "nv_util_include.h"
 
 
 FILE* nv_open_file(const char* filename, const char* mode);

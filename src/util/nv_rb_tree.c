@@ -1,23 +1,11 @@
+#include "nv_rb_tree.h"
 
 
 
-#include <stdio.h>
-#include <stdlib.h>
-
-// 定义颜色
-#define RED   0
-#define BLACK 1
-
-// 定义节点结构
-typedef struct Node {
-    int data;
-    int color;
-    struct Node *left, *right, *parent;
-} Node;
 
 // 创建新节点
-Node* newNode(int data) {
-    Node* node = (Node*)malloc(sizeof(Node));
+nv_rb_Node* nv_rb_newNode(int data) {
+    nv_rb_Node* node = (nv_rb_Node*)malloc(sizeof(nv_rb_Node));
     node->data = data;
     node->color = RED;
     node->left = node->right = node->parent = NULL;
@@ -25,8 +13,8 @@ Node* newNode(int data) {
 }
 
 // 左旋
-Node* leftRotate(Node* root, Node* pt) {
-    Node* pt_right = pt->right;
+nv_rb_Node* nv_rb_leftRotate(nv_rb_Node* root, nv_rb_Node* pt) {
+    nv_rb_Node* pt_right = pt->right;
     pt->right = pt_right->left;
 
     if (pt->right != NULL)
@@ -47,8 +35,8 @@ Node* leftRotate(Node* root, Node* pt) {
 }
 
 // 右旋
-Node* rightRotate(Node* root, Node* pt) {
-    Node* pt_left = pt->left;
+nv_rb_Node* nv_rb_rightRotate(nv_rb_Node* root, nv_rb_Node* pt) {
+    nv_rb_Node* pt_left = pt->left;
     pt->left = pt_left->right;
 
     if (pt->left != NULL)
@@ -69,9 +57,9 @@ Node* rightRotate(Node* root, Node* pt) {
 }
 
 // 插入修复
-Node* insertFix(Node* root, Node* pt) {
-    Node* parent_pt = NULL;
-    Node* grand_parent_pt = NULL;
+nv_rb_Node* nv_rb_insertFix(nv_rb_Node* root, nv_rb_Node* pt) {
+    nv_rb_Node* parent_pt = NULL;
+    nv_rb_Node* grand_parent_pt = NULL;
 
     while ((pt != root) && (pt->color != BLACK) &&
            (pt->parent->color == RED)) {
@@ -81,7 +69,7 @@ Node* insertFix(Node* root, Node* pt) {
 
         //  Case : A
         if (parent_pt == grand_parent_pt->left) {
-            Node* uncle_pt = grand_parent_pt->right;
+            nv_rb_Node* uncle_pt = grand_parent_pt->right;
 
             // Case : 1
             if (uncle_pt != NULL && uncle_pt->color == RED) {
@@ -94,11 +82,11 @@ Node* insertFix(Node* root, Node* pt) {
             // Case : 2
             else {
                 if (pt == parent_pt->right) {
-                    root = leftRotate(root, parent_pt);
+                    root = nv_rb_leftRotate(root, parent_pt);
                     pt = parent_pt;
                     parent_pt = pt->parent;
                 }
-                root = rightRotate(root, grand_parent_pt);
+                root = nv_rb_rightRotate(root, grand_parent_pt);
                 int t = parent_pt->color;
                 parent_pt->color = grand_parent_pt->color;
                 grand_parent_pt->color = t;
@@ -108,7 +96,7 @@ Node* insertFix(Node* root, Node* pt) {
 
         // Case : B
         else {
-            Node* uncle_pt = grand_parent_pt->left;
+            nv_rb_Node* uncle_pt = grand_parent_pt->left;
 
             // Case : 1
             if ((uncle_pt != NULL) && (uncle_pt->color == RED)) {
@@ -121,11 +109,11 @@ Node* insertFix(Node* root, Node* pt) {
             // Case : 2
             else {
                 if (pt == parent_pt->left) {
-                    root = rightRotate(root, parent_pt);
+                    root = nv_rb_rightRotate(root, parent_pt);
                     pt = parent_pt;
                     parent_pt = pt->parent;
                 }
-                root = leftRotate(root, grand_parent_pt);
+                root = nv_rb_leftRotate(root, grand_parent_pt);
                 int t = parent_pt->color;
                 parent_pt->color = grand_parent_pt->color;
                 grand_parent_pt->color = t;
@@ -139,49 +127,49 @@ Node* insertFix(Node* root, Node* pt) {
 }
 
 // BST插入
-Node* insertBST(Node* root, Node* pt) {
+nv_rb_Node* nv_rb_insertBST(nv_rb_Node* root, nv_rb_Node* pt) {
     if (root == NULL)
         return pt;
 
     if (pt->data < root->data) {
-        root->left = insertBST(root->left, pt);
+        root->left = nv_rb_insertBST(root->left, pt);
         root->left->parent = root;
     } else if (pt->data > root->data) {
-        root->right = insertBST(root->right, pt);
+        root->right = nv_rb_insertBST(root->right, pt);
         root->right->parent = root;
     }
 
     return root;
 }
 // 插入节点
-Node* insert(Node* root, int data) {
-    Node* pt = newNode(data);
+nv_rb_Node* nv_rb_insert(nv_rb_Node* root, int data) {
+    nv_rb_Node* pt = nv_rb_newNode(data);
 
     // Perform normal BST insertion
-    root = insertBST(root, pt);
+    root = nv_rb_insertBST(root, pt);
 
     // Fix the tree
-    root = insertFix(root, pt);
+    root = nv_rb_insertFix(root, pt);
     return root;
 }
 
 // 查找节点
-Node* search(Node* root, int data) {
+nv_rb_Node* nv_rb_search(nv_rb_Node* root, int data) {
     if (root == NULL || root->data == data)
         return root;
 
     if (root->data < data)
-        return search(root->right, data);
+        return nv_rb_search(root->right, data);
 
-    return search(root->left, data);
+    return nv_rb_search(root->left, data);
 }
 
 // 中序遍历
-void inorder(Node* root) {
+void nv_rb_inorder(nv_rb_Node* root) {
     if (root != NULL) {
-        inorder(root->left);
+        nv_rb_inorder(root->left);
         printf("%d  ", root->data);
-        inorder(root->right);
+        nv_rb_inorder(root->right);
     }
 }
 

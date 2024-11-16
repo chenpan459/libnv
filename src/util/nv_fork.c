@@ -9,9 +9,6 @@
 
 #include "nv_fork.h"
 
-// 定义函数指针类型
-typedef void (*process_func_t)(void);
-
 // 创建并执行子进程
 pid_t nv_create_process(process_func_t func) {
     pid_t pid = fork();

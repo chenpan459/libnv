@@ -7,31 +7,108 @@
 #include "nv_string.h"
 #include "nv_thread.h"
 #include "nv_time.h"
+#include "nv_md5.h"
+#include "nv_hash_table.h"
+#include "nv_socket.h"
+#include "nv_thread.h"
+#include "nv_signal.h"
+#include "nv_lock.h"
 
 
-int main() {
 
-    return 0;
+
+#define CALCULATE_MD5   0
+#define NV_HASH_TABLE   0
+#define NV_SOCKET_DEBUG 0
+#define NV_RB_THREAD_DEBUG 0
+#define NV_RB_TREE_DEBUG  0
+#define NV_SIGNAL_DEBUG 0
+#define NV_FILE_DEBUG 0
+#define NV_FORK_DEBUG 0
+#define NV_DEBUG_LIST 0
+#define NV_LOCK_DEBUG 1
+
+// 示例线程函数
+void* thread_function(void* arg) {
+    int thread_num = *((int*)arg);
+    printf("线程 %d 正在执行...\n", thread_num);
+    sleep(1); // 模拟线程工作
+    printf("线程 %d 执行完毕。\n", thread_num);
+    return NULL;
 }
 
 
-#if NV_SOCKET_DEBUG
+
+// 示例子进程函数
+void child_process() {
+    printf("子进程正在执行...\n");
+    sleep(2); // 模拟子进程工作
+    printf("子进程执行完毕。\n");
+}
+
+// 示例：使用互斥锁保护共享资源
+void critical_section() {
+    // 临界区代码
+    printf("进入临界区...\n");
+    sleep(1); // 模拟耗时操作
+    printf("离开临界区。\n");
+}
+
 int main() {
-    // 运行 TCP 服务器（在单独的终端中执行）
+
+ 
+#if  CALCULATE_MD5
+    char md5_hash[33];
+    char * fileName ="./nv_md5.c";
+    if (nv_calculate_file_md5(fileName, md5_hash) == 0) {
+        printf("%s 的MD5值: %s\n", fileName, md5_hash);
+    }
+#endif 
+
+
+
+#if NV_HASH_TABLE
+
+    HashTable* table = nv_hash_table_create(HASH_SIZE);
+
+    nv_hash_table_insert(table, "key1", "value1");
+    nv_hash_table_insert(table, "key2", "value2");
+    nv_hash_table_insert(table, "key3", "value3");
+
+    printf("key1: %s\n", nv_hash_table_find(table, "key1"));
+    printf("key2: %s\n", nv_hash_table_find(table, "key2"));
+    printf("key3: %s\n", nv_hash_table_find(table, "key3"));
+
+    nv_hash_table_delete(table, "key2");
+
+    printf("key2: %s\n", nv_hash_table_find(table, "key2"));
+
+    nv_hash_table_destroy(table);
+
+
+#endif
+
+
+
+
+#if NV_SOCKET_DEBUG
+   // 运行 TCP 服务器（在单独的终端中执行）
     // run_tcp_server("127.0.0.1", 8080);
 
     // 运行 TCP 客户端
     run_tcp_client("127.0.0.1", 8080);
 
-    return 0;
-}
+
 
 #endif 
-#if NV_RB_TREE_DEBUG
-int main() {
+
+
+#if NV_RB_THREAD_DEBUG
     pthread_t threads[5];
     int thread_args[5];
     pthread_attr_t attr;
+
+
 
     // 初始化线程属性
     if (nv_init_thread_attr(&attr, PTHREAD_CREATE_JOINABLE, 0) != 0) {
@@ -61,39 +138,40 @@ int main() {
 
     printf("所有线程已结束。\n");
     return 0;
-}
+
 #endif
 
+
+
+
 #if NV_RB_TREE_DEBUG
-int main() {
-    Node* root = NULL;
-    root = insert(root, 7);
-    root = insert(root, 6);
-    root = insert(root, 5);
-    root = insert(root, 4);
-    root = insert(root, 3);
-    root = insert(root, 2);
-    root = insert(root, 1);
+
+    nv_rb_Node* root = NULL;
+    root = nv_rb_insert(root, 7);
+    root = nv_rb_insert(root, 6);
+    root = nv_rb_insert(root, 5);
+    root = nv_rb_insert(root, 4);
+    root = nv_rb_insert(root, 3);
+    root = nv_rb_insert(root, 2);
+    root = nv_rb_insert(root, 1);
 
     printf("中序遍历结果: ");
-    inorder(root);
+    nv_rb_inorder(root);
 
     int num = 4;
-    Node* res = search(root, num);
+    nv_rb_Node* res = nv_rb_search(root, num);
     if (res != NULL)
         printf("\n元素 %d 在树中\n", num);
     else
         printf("\n元素 %d 不在树中\n", num);
 
     return 0;
-}
 
 #endif
 
 
 #if NV_SIGNAL_DEBUG
 
-int main() {
     pid_t pid = getpid();
 
     // 注册信号处理函数
@@ -118,12 +196,11 @@ int main() {
     // 再次暂停等待信号
     pause();
 
-    return 0;
-}
+
 #endif
 
-#if FILE_DEBUG
-int main() {
+#if NV_FILE_DEBUG
+
     const char* filename = "example.txt";
     FILE* file = nv_open_file(filename, "w");
     if (file != NULL) {
@@ -141,14 +218,12 @@ int main() {
         nv_close_file(file);
     }
 
-    return 0;
-}
 #endif
 
 
 #if NV_FORK_DEBUG
 
-int main() {
+
     // 创建守护进程
     if (nv_create_daemon() < 0) {
         perror("创建守护进程失败");
@@ -161,62 +236,40 @@ int main() {
         sleep(1); // 示例：每隔 1 秒执行一次
     }
 
-    return 0;
-}
 
-// 示例子进程函数
-void child_process() {
-    printf("子进程正在执行...\n");
-    sleep(2); // 模拟子进程工作
-    printf("子进程执行完毕。\n");
-}
-int main() {
     pid_t pid = nv_create_process(child_process);
     if (pid > 0) {
         printf("父进程等待子进程结束...\n");
         int exit_status = nv_wait_process(pid);
         printf("子进程结束，退出状态 = %d\n", exit_status);
     }
-
-    return 0;
-}
 #endif
 
 
 
-#if DEBUG_LIST
-int main() {
-    Node* head = NULL;
+#if NV_DEBUG_LIST
 
-    head = insertEnd(head, 1);
-    head = insertEnd(head, 2);
-    head = insertEnd(head, 3);
-    head = insertEnd(head, 4);
+    nv_list_Node* head = NULL;
+
+    head = nv_list_insertEnd(head, 1);
+    head = nv_list_insertEnd(head, 2);
+    head = nv_list_insertEnd(head, 3);
+    head = nv_list_insertEnd(head, 4);
 
     printf("链表内容: ");
-    printList(head);
+    nv_list_printList(head);
 
-    head = deleteNode(head, 3);
+    head = nv_list_deleteNode(head, 3);
     printf("删除节点 3 后的链表: ");
-    printList(head);
+    nv_list_printList(head);
 
-    return 0;
-}
+
 #endif
 
 
 
 
 #if NV_LOCK_DEBUG
-// 示例：使用互斥锁保护共享资源
-void critical_section() {
-    // 临界区代码
-    printf("进入临界区...\n");
-    sleep(1); // 模拟耗时操作
-    printf("离开临界区。\n");
-}
-
-int main() {
     nv_mutex_t mutex;
     
     // 初始化互斥锁
@@ -242,7 +295,10 @@ int main() {
     // 销毁互斥锁
     nv_mutex_destroy(&mutex);
 
+
+#endif
     return 0;
 }
 
-#endif
+
+

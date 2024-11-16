@@ -1,10 +1,6 @@
-#include <pthread.h>
-#include <stdio.h>
-#include <stdlib.h>
 #include "nv_lock.h"
 
-// 定义互斥锁类型
-typedef pthread_mutex_t nv_mutex_t;
+
 
 // 初始化互斥锁
 int nv_mutex_init(nv_mutex_t *mutex) {

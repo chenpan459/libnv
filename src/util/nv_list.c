@@ -2,16 +2,10 @@
 #include <stdlib.h>
 #include "nv_list.h"
 
-// 定义节点结构
-typedef struct Node {
-    int data;
-    struct Node* prev;
-    struct Node* next;
-} Node;
 
 // 创建新节点
-Node* createNode(int data) {
-    Node* newNode = (Node*)malloc(sizeof(Node));
+nv_list_Node* nv_list_createNode(int data) {
+    nv_list_Node* newNode = (nv_list_Node*)malloc(sizeof(nv_list_Node));
     if (!newNode) {
         printf("内存分配失败\n");
         return NULL;
@@ -23,8 +17,8 @@ Node* createNode(int data) {
 }
 
 // 插入节点到链表尾部
-Node* insertEnd(Node* head, int data) {
-    Node* newNode = createNode(data);
+nv_list_Node* nv_list_insertEnd(nv_list_Node* head, int data) {
+    nv_list_Node* newNode = nv_list_createNode(data);
     if (newNode == NULL) return head;
 
     if (head == NULL) {
@@ -32,7 +26,7 @@ Node* insertEnd(Node* head, int data) {
         return head;
     }
 
-    Node* temp = head;
+    nv_list_Node* temp = head;
     while (temp->next != NULL) {
         temp = temp->next;
     }
@@ -43,10 +37,10 @@ Node* insertEnd(Node* head, int data) {
 }
 
 // 删除节点
-Node* deleteNode(Node* head, int key) {
+nv_list_Node* nv_list_deleteNode(nv_list_Node* head, int key) {
     if (head == NULL) return NULL;
 
-    Node* temp = head;
+    nv_list_Node* temp = head;
     while (temp != NULL && temp->data != key) {
         temp = temp->next;
     }
@@ -63,8 +57,8 @@ Node* deleteNode(Node* head, int key) {
 }
 
 // 打印链表
-void printList(Node* head) {
-    Node* temp = head;
+void nv_list_printList(nv_list_Node* head) {
+    nv_list_Node* temp = head;
     while (temp != NULL) {
         printf("%d ", temp->data);
         temp = temp->next;

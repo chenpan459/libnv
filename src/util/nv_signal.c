@@ -1,7 +1,5 @@
-#include "signal.h"
+#include "nv_signal.h"
 
-// 定义信号处理函数类型
-typedef void (*nv_signal_handler_t)(int);
 
 // 注册信号处理函数
 int nv_signal_register(int signum, nv_signal_handler_t handler) {
