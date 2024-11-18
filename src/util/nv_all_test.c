@@ -11,7 +11,7 @@
 #include "net/nv_socket.h"
 #include "sys/nv_thread.h"
 #include "ipc/nv_signal.h"
-#include "ipc/nv_lock.h"
+#include "sys/nv_lock.h"
 #include "algo/nv_base64.h"
 #include "sys/nv_thread_pool.h"
 #include "ipc/nv_message_queue.h"
