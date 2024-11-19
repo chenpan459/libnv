@@ -2,7 +2,7 @@
 #include "nv_hash_table.h"
 
 // 哈希函数
-unsigned int hash(const char* key, int size) {
+static unsigned int hash(const char* key, int size) {
     unsigned int hash = 0;
     while (*key) {
         hash = (hash << 5) + *key++;

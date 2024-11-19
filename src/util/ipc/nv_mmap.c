@@ -1,88 +1,82 @@
 #include "nv_mmap.h"
 
-// 打开文件并建立内存映射
-nv_mmap_t* nv_mmap_open(const char* filepath) {
-    nv_mmap_t* mmap = (nv_mmap_t*)malloc(sizeof(nv_mmap_t));
-    if (!mmap) {
-        perror("NV: Failed to allocate memory for mmap object");
+// 打开内存映射文件
+nv_mmap_file_t* nv_mmap_open(const char* filepath, size_t size) {
+    nv_mmap_file_t* mmap_file = (nv_mmap_file_t*)malloc(sizeof(nv_mmap_file_t));
+    if (!mmap_file) {
+        perror("malloc");
         return NULL;
     }
 
-    // 打开文件
-    mmap->fd = open(filepath, O_RDWR);
-    if (mmap->fd == -1) {
-        perror("NV: Failed to open file");
-        free(mmap);
+    mmap_file->fd = open(filepath, O_RDWR | O_CREAT, 0666);
+    if (mmap_file->fd == -1) {
+        perror("open");
+        free(mmap_file);
         return NULL;
     }
 
-    // 获取文件大小
-    struct stat sb;
-    if (fstat(mmap->fd, &sb) == -1) {
-        perror("NV: Failed to get file size");
-        close(mmap->fd);
-        free(mmap);
-        return NULL;
-    }
-    mmap->length = sb.st_size;
-
-    // 建立内存映射
-    mmap->addr = mmap(NULL, mmap->length, PROT_READ | PROT_WRITE, MAP_SHARED, mmap->fd, 0);
-    if (mmap->addr == MAP_FAILED) {
-        perror("NV: Failed to mmap file");
-        close(mmap->fd);
-        free(mmap);
+    if (ftruncate(mmap_file->fd, size) == -1) {
+        perror("ftruncate");
+        close(mmap_file->fd);
+        free(mmap_file);
         return NULL;
     }
 
-    return mmap;
+    mmap_file->data = mmap(NULL, size, PROT_READ | PROT_WRITE, MAP_SHARED, mmap_file->fd, 0);
+    if (mmap_file->data == MAP_FAILED) {
+        perror("mmap");
+        close(mmap_file->fd);
+        free(mmap_file);
+        return NULL;
+    }
+
+    mmap_file->size = size;
+    return mmap_file;
 }
 
-// 取消内存映射并关闭文件
-void nv_mmap_close(nv_mmap_t* mmap) {
-    if (mmap) {
-        if (munmap(mmap->addr, mmap->length) == -1) {
-            perror("NV: Failed to unmap file");
-        }
-        close(mmap->fd);
-        free(mmap);
+// 读取数据
+void nv_mmap_read(nv_mmap_file_t* mmap_file, size_t offset, void* buffer, size_t size) {
+    if (offset + size > mmap_file->size) {
+        fprintf(stderr, "Read out of bounds\n");
+        return;
+    }
+    memcpy(buffer, (char*)mmap_file->data + offset, size);
+}
+
+// 写入数据
+void nv_mmap_write(nv_mmap_file_t* mmap_file, size_t offset, const void* buffer, size_t size) {
+    if (offset + size > mmap_file->size) {
+        fprintf(stderr, "Write out of bounds\n");
+        return;
+    }
+    memcpy((char*)mmap_file->data + offset, buffer, size);
+}
+
+// 关闭内存映射文件
+void nv_mmap_close(nv_mmap_file_t* mmap_file) {
+    if (mmap_file) {
+        munmap(mmap_file->data, mmap_file->size);
+        close(mmap_file->fd);
+        free(mmap_file);
     }
 }
-
-// 获取映射区域的地址和长度
-void* nv_mmap_get_addr(nv_mmap_t* mmap) {
-    return mmap ? mmap->addr : NULL;
-}
-
-size_t nv_mmap_get_length(nv_mmap_t* mmap) {
-    return mmap ? mmap->length : 0;
-}
-
-
-
-
 
 int nv_mmap_main() {
-    const char* filepath = "test.txt"; // 修改为你的文件路径
+    const char* filepath = "example_file.txt";
+    size_t size = 1024;
 
-    // 打开文件并建立内存映射
-    nv_mmap_t* mmap = nv_mmap_open(filepath);
-    if (!mmap) {
-        return EXIT_FAILURE;
+    nv_mmap_file_t* mmap_file = nv_mmap_open(filepath, size);
+    if (!mmap_file) {
+        return 1;
     }
 
-    // 获取映射区域的地址和长度
-    void* addr = nv_mmap_get_addr(mmap);
-    size_t length = nv_mmap_get_length(mmap);
+    const char* message = "Hello, mmap!";
+    nv_mmap_write(mmap_file, 0, message, strlen(message) + 1);
 
-    // 读取并打印文件内容
-    printf("File content:\n%s\n", (char*)addr);
+    char buffer[50];
+    nv_mmap_read(mmap_file, 0, buffer, sizeof(buffer));
+    printf("Read from mmap: %s\n", buffer);
 
-    // 修改文件内容
-    strncpy((char*)addr, "Hello, mmap!", length);
-
-    // 取消内存映射并关闭文件
-    nv_mmap_close(mmap);
-
-    return EXIT_SUCCESS;
+    nv_mmap_close(mmap_file);
+    return 0;
 }
