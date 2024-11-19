@@ -12,7 +12,7 @@ LDFLAGS = -lpthread -lrt -lusb-1.0
 #SRCS = $(shell find . -name "*.c")
 # 使用wildcard函数搜索当前目录和子目录中的.c文件
 SRCS = $(wildcard *.c) \
-      $(foreach d,$(wildcard */),$(call wildcard,$d/*.c))
+      $(foreach d,$(wildcard */),$(call wildcard,$d*.c))
 	  
 # 定义目标文件名
 TARGET = output

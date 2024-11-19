@@ -7,30 +7,32 @@ extern "C" {
 
 #include "../nv_util_include.h"
 
-#include <fcntl.h>
 #include <termios.h>
-
+#include <stddef.h>
 
 // RS-485 通信接口结构体
 typedef struct {
     int fd;
-    struct termios tty;
+    struct termios options;
 } nv_rs485_t;
 
 // 打开 RS-485 端口
-nv_rs485_t* nv_rs485_open(const char* portname) ;
+nv_rs485_t* nv_rs485_open(const char* portname);
 
 // 配置 RS-485 端口
-int nv_rs485_configure(nv_rs485_t* rs485, int baudrate) ;
+int nv_rs485_configure(nv_rs485_t* rs485, int baudrate, int data_bits, int stop_bits, char parity);
+
 // 读取数据
-ssize_t nv_rs485_read(nv_rs485_t* rs485, void* buffer, size_t size) ;
+ssize_t nv_rs485_read(nv_rs485_t* rs485, void* buffer, size_t size);
 
 // 写入数据
-ssize_t nv_rs485_write(nv_rs485_t* rs485, const void* buffer, size_t size) ;
+ssize_t nv_rs485_write(nv_rs485_t* rs485, const void* buffer, size_t size);
 
 // 关闭 RS-485 端口
-void nv_rs485_close(nv_rs485_t* rs485) ;
+void nv_rs485_close(nv_rs485_t* rs485);
 
+
+int nv_rs485_main() ;
 
 #ifdef __cplusplus
 }

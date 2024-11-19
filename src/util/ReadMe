@@ -1,3 +1,47 @@
+在 Linux 系统编程中，有许多技术点和概念需要掌握。以下是一些关键的技术点:
+
+1. 文件操作
+文件描述符:使用 open、read、write、close 等系统调用进行文件操作。
+文件权限:使用 chmod、chown 等命令和系统调用设置文件权限。
+文件锁:使用 flock、fcntl 实现文件锁定。
+2. 进程管理
+进程创建:使用 fork 创建子进程。
+进程终止:使用 exit、_exit 终止进程。
+进程等待:使用 wait、waitpid 等等待子进程结束。
+进程间通信(IPC):使用管道(pipe)、消息队列、共享内存、信号量等实现进程间通信。
+3. 线程管理
+线程创建:使用 pthread_create 创建线程。
+线程同步:使用互斥锁(pthread_mutex)、条件变量(pthread_cond)、读写锁(pthread_rwlock)等实现线程同步。
+线程终止:使用 pthread_exit 终止线程。
+线程等待:使用 pthread_join 等待线程结束。
+4. 信号处理
+信号发送:使用 kill、raise 发送信号。
+信号捕捉:使用 signal、sigaction 捕捉和处理信号。
+信号屏蔽:使用 sigprocmask 屏蔽信号。
+5. 定时器
+定时器创建:使用 timer_create 创建定时器。
+定时器设置:使用 timer_settime 设置定时器。
+定时器删除:使用 timer_delete 删除定时器。
+6. 网络编程
+套接字编程:使用 socket、bind、listen、accept、connect、send、recv 等系统调用进行网络编程。
+多路复用:使用 select、poll、epoll 实现多路复用。
+7. 内存管理
+动态内存分配:使用 malloc、calloc、realloc、free 进行动态内存分配和释放。
+内存映射:使用 mmap、munmap 实现内存映射文件。
+8. 设备驱动
+字符设备:编写字符设备驱动程序，使用 open、read、write、ioctl 等操作字符设备。
+块设备:编写块设备驱动程序，使用 request、make_request 等操作块设备。
+9. 文件系统
+文件系统类型:了解不同的文件系统类型，如 ext4、xfs、btrfs 等。
+挂载和卸载:使用 mount、umount 挂载和卸载文件系统。
+文件系统操作:使用 mkfs、fsck 等命令操作文件系统。
+10. 调试和性能分析
+调试工具:使用 gdb、strace、ltrace 等工具进行调试。
+性能分析工具:使用 perf、valgrind、gprof 等工具进行性能分析和内存泄漏检测。
+这些技术点涵盖了 Linux 系统编程的主要方面，掌握这些技术点可以帮助你编写高效、可靠的 Linux 应用程序。
+
+
+
 1、硬件相关
 1.1 USB通信
 1.2 串口通信
