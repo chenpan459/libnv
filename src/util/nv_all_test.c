@@ -23,6 +23,7 @@
 #include "net/nv_socket_poll.h"
 #include "net/nv_socket_select.h"
 #include "sys/nv_timer_task.h"
+#include "ipc/nv_mmap.h"
 
 
 
