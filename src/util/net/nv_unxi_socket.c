@@ -87,12 +87,14 @@ int nv_unix_socket_set_receive_buffer_size(int sockfd, int size) {
 
 
 
+#if NV_UTIL_TEST_ON
+
 #define SOCKET_PATH "/tmp/unix_socket_example"
 #define BUFFER_SIZE 256
 #define SEND_BUFFER_SIZE 8192
 #define RECEIVE_BUFFER_SIZE 8192
 
-int nv_unix_socket_main() {
+int nv_unix_socket_server_main() {
     int server_fd, client_fd;
     char buffer[BUFFER_SIZE];
 
@@ -153,3 +155,50 @@ int nv_unix_socket_main() {
 
     return 0;
 }
+
+
+
+
+int nv_unix_socket_client_main() {
+    int client_fd;
+    char buffer[BUFFER_SIZE];
+
+    // 创建 Unix 套接字
+    client_fd = nv_unix_socket_create();
+    if (client_fd < 0) {
+        return 1;
+    }
+
+    // 连接到服务器
+    if (nv_unix_socket_connect(client_fd, SOCKET_PATH) < 0) {
+        nv_unix_socket_close(client_fd);
+        return 1;
+    }
+
+    // 设置缓冲区大小
+    nv_unix_socket_set_send_buffer_size(client_fd, SEND_BUFFER_SIZE);
+    nv_unix_socket_set_receive_buffer_size(client_fd, RECEIVE_BUFFER_SIZE);
+
+    // 发送数据
+    const char *message = "Hello from client";
+    if (nv_unix_socket_send(client_fd, message, strlen(message)) < 0) {
+        nv_unix_socket_close(client_fd);
+        return 1;
+    }
+
+    // 接收响应
+    memset(buffer, 0, BUFFER_SIZE);
+    if (nv_unix_socket_receive(client_fd, buffer, BUFFER_SIZE) < 0) {
+        nv_unix_socket_close(client_fd);
+        return 1;
+    }
+
+    printf("Received response: %s\n", buffer);
+
+    // 关闭连接
+    nv_unix_socket_close(client_fd);
+
+    return 0;
+}
+
+#endif 

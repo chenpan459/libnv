@@ -36,7 +36,14 @@ int nv_unix_socket_set_send_buffer_size(int sockfd, int size);
 // 设置接收缓冲区大小
 int nv_unix_socket_set_receive_buffer_size(int sockfd, int size);
 
-int  nv_unix_socket_main();
+
+
+#if NV_UTIL_TEST_ON
+int  nv_unix_socket_server_main();
+int nv_unix_socket_client_main() ;
+#endif
+
+
 #ifdef __cplusplus
 }
 #endif

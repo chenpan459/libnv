@@ -24,8 +24,7 @@
 #include "net/nv_socket_select.h"
 #include "sys/nv_timer_task.h"
 #include "ipc/nv_mmap.h"
-
-
+#include "net/nv_unix_socket.h"
 
 #define CALCULATE_MD5   0
 #define NV_HASH_TABLE   0
@@ -84,7 +83,10 @@ int main() {
   // nv_file_main();
 ///   nv_list_main();
 
-  nv_timer_task_main() ;
+ // nv_timer_task_main() ;
+ //nv_unix_socket_server_main();
+nv_unix_socket_client_main();
+ 
 
 
 #if NV_RB_THREAD_DEBUG
