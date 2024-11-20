@@ -5,7 +5,8 @@
 extern "C" {
 #endif
 #include "../nv_util_include.h"
-
+#include <stdio.h>
+#include <stdlib.h>
 // 定义节点结构
 typedef struct nv_list_Node {
     int data;

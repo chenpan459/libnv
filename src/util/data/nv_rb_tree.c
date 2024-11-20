@@ -1,8 +1,5 @@
 #include "nv_rb_tree.h"
 
-
-
-
 // 创建新节点
 nv_rb_Node* nv_rb_newNode(int data) {
     nv_rb_Node* node = (nv_rb_Node*)malloc(sizeof(nv_rb_Node));

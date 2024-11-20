@@ -6,6 +6,11 @@
 extern "C" {
 #endif
 #include "../nv_util_include.h"
+#include <stdio.h>
+#include <stdlib.h>
+#include <fcntl.h>
+#include <sys/stat.h>
+#include <unistd.h>
 
 #define FIFO_NAME "./my_fifo"
 

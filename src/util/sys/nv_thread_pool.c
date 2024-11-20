@@ -1,8 +1,5 @@
 #include "nv_thread_pool.h"
 
-
-
-
 threadpool_t *nv_threadpool_create() {
     threadpool_t *tp;
     int i;

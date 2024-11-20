@@ -1,5 +1,4 @@
 #include "nv_mem.h"
-#include "nv_mem.h"
 
 // 封装 malloc 函数
 // 参数: size - 要分配的内存大小（以字节为单位）

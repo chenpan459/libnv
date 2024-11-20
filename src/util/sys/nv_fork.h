@@ -5,7 +5,13 @@
 extern "C" {
 #endif
 #include "../nv_util_include.h"
-
+#include <stdio.h>
+#include <stdlib.h>
+#include <unistd.h>
+#include <sys/types.h>
+#include <sys/wait.h>
+#include <sys/stat.h>
+#include <fcntl.h>
 
 // 定义函数指针类型
 typedef void (*process_func_t)(void);
