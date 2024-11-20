@@ -1,6 +1,13 @@
 #include "nv_unix_socket.h"
 
-/*为了封装 Unix 套接字通信接口，可以创建一个包含创建、绑定、连接、发送和接收数据等功能的接口。展示如何封装 Unix 套接字通信接口。*/
+/*为了封装 Unix 套接字通信接口，可以创建一个包含创建、绑定、连接、发送和接收数据等功能的接口。展示如何封装 Unix 套接字通信接口。
+nv_unix_socket_create：创建 Unix 套接字。
+nv_unix_socket_bind：绑定 Unix 套接字到指定路径。
+nv_unix_socket_connect：连接到指定路径的 Unix 套接字。
+nv_unix_socket_send：发送数据到 Unix 套接字。
+nv_unix_socket_receive：接收来自 Unix 套接字的数据。
+nv_unix_socket_close：关闭 Unix 套接字。
+*/
 
 // 创建 Unix 套接字
 int nv_unix_socket_create() {
