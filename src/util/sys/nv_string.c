@@ -90,4 +90,13 @@ void* nv_memset(void *dest,int a,size_t  n ) {
 
 
 
+// 字符串连接
+char* nv_strcat(char *dest, const char *src) {
+    return strcat(dest, src);
+}
+// 获取字符串长度
+size_t nv_strlen(const char *str) {
+    return strlen(str);
+}
+
 
