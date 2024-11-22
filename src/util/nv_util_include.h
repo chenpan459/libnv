@@ -37,4 +37,20 @@
 
 #define NV_UTIL_TEST_ON 1
 
+// 定义基本数据类型
+typedef int8_t     nv_int8;
+typedef uint8_t    nv_uint8;
+typedef int16_t    nv_int16;
+typedef uint16_t   nv_uint16;
+typedef int32_t    nv_int32;
+typedef uint32_t   nv_uint32;
+typedef int64_t    nv_int64;
+typedef uint64_t   nv_uint64;
+typedef float      nv_float;
+typedef double     nv_double;
+typedef char       nv_char;
+typedef unsigned char nv_uchar;
+typedef void*       nv_pointer;
+
+
 #endif
