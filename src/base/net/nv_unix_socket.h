@@ -5,7 +5,7 @@
 extern "C" {
 #endif
 
-#include "../nv_util_include.h"
+#include "../nv_base_include.h"
 #include <sys/types.h>
 #include <sys/socket.h>
 #include <sys/un.h>

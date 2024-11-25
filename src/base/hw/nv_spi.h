@@ -5,7 +5,7 @@
 extern "C" {
 #endif
 
-#include "../nv_util_include.h"
+#include "../nv_base_include.h"
 #include <sys/ioctl.h>
 #include <linux/spi/spidev.h>
 #include <stdint.h>

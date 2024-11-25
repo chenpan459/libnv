@@ -6,7 +6,7 @@
 extern "C" {
 #endif
 
-#include "../nv_util_include.h"
+#include "../nv_base_include.h"
 
 
 // Base64编码函数

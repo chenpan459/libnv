@@ -8,7 +8,7 @@
 #ifdef __cplusplus
 extern "C" {
 #endif
-#include "../nv_util_include.h"
+#include "../nv_base_include.h"
 
 #define HASH_SIZE 100  // 哈希表大小
 

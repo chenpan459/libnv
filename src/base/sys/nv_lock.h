@@ -4,7 +4,7 @@
 #ifdef __cplusplus
 extern "C" {
 #endif
-#include "../nv_util_include.h"
+#include "../nv_base_include.h"
 
 // 定义互斥锁类型
 typedef pthread_mutex_t nv_mutex_t;

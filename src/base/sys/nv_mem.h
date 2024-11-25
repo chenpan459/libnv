@@ -5,7 +5,7 @@
 extern "C" {
 #endif
 
-#include "../nv_util_include.h"
+#include "../nv_base_include.h"
 
 // 封装 malloc 函数
 // 参数: size - 要分配的内存大小（以字节为单位）

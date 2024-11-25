@@ -6,7 +6,7 @@
 extern "C" {
 #endif
 
-#include "../nv_util_include.h"
+#include "../nv_base_include.h"
 int nv_calculate_file_md5(const char *filename, char *output);
 void nv_MD5(const char *input, char *output);
 int nv_md5_main();

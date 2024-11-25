@@ -6,7 +6,7 @@
 extern "C" {
 #endif
 
-#include "../nv_util_include.h"
+#include "../nv_base_include.h"
 
 int time_diff(char *time1_str,char *time2_str);
 int get_current_time(char * cur_time) ;

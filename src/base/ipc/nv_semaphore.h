@@ -5,7 +5,7 @@
 extern "C" {
 #endif
 
-#include "../nv_util_include.h"
+#include "../nv_base_include.h"
 
 #define SEM_NAME "/my_semaphore"
 

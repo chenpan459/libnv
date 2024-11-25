@@ -6,7 +6,7 @@
 extern "C" {
 #endif
 
-#include "../nv_util_include.h"
+#include "../nv_base_include.h"
 // 定义信号处理函数类型
 typedef void (*nv_signal_handler_t)(int);
 
