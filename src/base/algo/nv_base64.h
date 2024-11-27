@@ -6,8 +6,9 @@
 extern "C" {
 #endif
 
-#include "../nv_base_include.h"
+//#include "../nv_config.h"
 
+#include <nv_config.h>
 
 // Base64编码函数
 char *nv_base64_encode(const unsigned char *input, size_t length);

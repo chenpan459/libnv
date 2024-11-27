@@ -5,7 +5,7 @@
 extern "C" {
 #endif
 
-#include "../nv_base_include.h"
+#include <nv_config.h>
 
 unsigned long nv_hash_string(const char *str);
 

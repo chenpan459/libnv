@@ -5,7 +5,7 @@
 extern "C" {
 #endif
 
-#include "../nv_base_include.h"
+#include  <nv_config.h>
 #define SHM_NAME "/my_shared_memory"
 #define SHM_SIZE 4096 // 4 KB
 

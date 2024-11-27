@@ -1,11 +1,13 @@
 # 定义编译器
 CC = gcc
 
+# 自动查找所有头文件所在的目录
+INCLUDE_DIRS = $(shell find . -type f -name '*.h' -exec dirname {} \; | sort -u)
 # 定义编译选项
-CFLAGS = -Wall -g
+CFLAGS = -Wall -g $(foreach dir, $(INCLUDE_DIRS), -I$(dir))
 
 # 定义链接选项
-LDFLAGS = -lpthread -lrt -lusb-1.0 -lm
+LDFLAGS = -lpthread -lrt -lusb-1.0 -lm -ldl
 
 # 找出所有的.c文件
 #SRCS = $(wildcard *.c)

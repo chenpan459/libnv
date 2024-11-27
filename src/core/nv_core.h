@@ -14,8 +14,6 @@
 #define _NV_CORE_H_INCLUDED_
 
 
-#include <nv_config.h>
-
 
 /*typedef struct nv_module_s          nv_module_t;
 */typedef struct nv_conf_s            nv_conf_t;
@@ -51,7 +49,7 @@ typedef void (*nv_connection_handler_pt)(nv_connection_t *c);
 #include <stdio.h>
 #include <stdarg.h>
 
-#include <nv_errno.h>
+
 /*#include <nv_atomic.h>
 #include <nv_thread.h>
 #include <nv_rbtree.h>

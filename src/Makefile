@@ -1,11 +1,15 @@
 # 定义编译器
 CC = gcc
 
-# 定义编译选项
-CFLAGS = -Wall -I./unix -I./core
+# 自动查找所有头文件所在的目录
+INCLUDE_DIRS = $(shell find . -type f -name '*.h' -exec dirname {} \; | sort -u)
+
+CFLAGS = -Wall $(foreach dir, $(INCLUDE_DIRS), -I$(dir))
+
+
 
 # 定义链接选项
-LDFLAGS = -pthread -lrt
+LDFLAGS = -pthread -lrt -ldl
 
 # 定义库的名称
 LIB_NAME = libnv

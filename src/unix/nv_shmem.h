@@ -14,10 +14,10 @@
 #define _NV_SHMEM_H_INCLUDED_
 
 
-#include <nv_linux_config.h>
-#include <nv_config.h>
+
 #include <nv_core.h>
 
+#if 0
 
 
 typedef struct {
@@ -33,6 +33,6 @@ nv_int_t nv_shm_alloc(nv_shm_t *shm);
 void nv_shm_free(nv_shm_t *shm);
 
 
-
+#endif
 
 #endif /* _NGX_SHMEM_H_INCLUDED_ */

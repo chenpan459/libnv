@@ -1,15 +1,27 @@
+# 定义编译器
 CC = gcc
-CFLAGS = -Wall -Wextra -I../src/unix -I../src/core
-LDFLAGS = -L../lib -lnv -pthread
 
-TARGET = test_log
+# 定义编译选项
+CFLAGS = -Wall
 
-all: $(TARGET)
+# 定义链接选项
+LDFLAGS = 
 
-$(TARGET): benchmark_nv.c
-	$(CC) $(CFLAGS) $^ -o $@ $(LDFLAGS)
+# 定义需要构建的子目录
+SUBDIRS = ex0 ex1
 
+# 默认目标
+all: $(SUBDIRS)
+
+# 清理构建的子目录
 clean:
-	rm -f $(TARGET)
+	for dir in $(SUBDIRS); do \
+		$(MAKE) -C $$dir clean; \
+	done
 
-.PHONY: all clean
+# 调用子目录的 Makefile
+$(SUBDIRS):
+	$(MAKE) -C $@
+
+# 防止 make 执行时自动补全文件名
+.PHONY: all clean $(SUBDIRS)

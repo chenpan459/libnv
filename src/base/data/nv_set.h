@@ -4,7 +4,7 @@
 #ifdef __cplusplus
 extern "C" {
 #endif
-#include "../nv_base_include.h"
+#include  <nv_config.h>
 
 #include <stdbool.h>
 // 集合节点结构体

@@ -6,8 +6,7 @@
  * 
  ***********************************************/
 
-#include <nv_linux_config.h>
-#include <nv_config.h>
+
 #include <nv_core.h>
 #include <nv_shmem.h>
 

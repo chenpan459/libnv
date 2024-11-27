@@ -5,7 +5,7 @@
 extern "C" {
 #endif
 
-#include "../nv_base_include.h"
+#include  <nv_config.h>
 
 /********************
  初始化 poll 结构：

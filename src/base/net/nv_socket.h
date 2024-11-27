@@ -5,7 +5,7 @@
 extern "C" {
 #endif
 
-#include "../nv_base_include.h"
+#include "../nv_config.h"
 
 int nv_tcp_socket_create() ;
 int nv_udp_socket_create() ;

@@ -14,10 +14,15 @@
 #ifndef _NV_ERRNO_H_INCLUDED_
 #define _NV_ERRNO_H_INCLUDED_
 
+#ifdef __cplusplus
+extern "C" {
+#endif
+
+#include  <nv_config.h>
+
 #include <sys/types.h> 
-#include <nv_config.h>
 #include <nv_core.h>
-#include <nv_linux_config.h>
+
 
 #if EDOM > 0
 # define NV__ERR(x) (-(x))
@@ -85,8 +90,8 @@ typedef int               nv_err_t;
 #define nv_set_socket_errno(err)  errno = err
 
 
-u_char *nv_strerror(nv_err_t err, u_char *errstr, size_t size);
-nv_int_t nv_strerror_init(void);
 
-
+#ifdef __cplusplus
+}
+#endif
 #endif /* _NGX_ERRNO_H_INCLUDED_ */

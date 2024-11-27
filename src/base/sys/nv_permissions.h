@@ -5,7 +5,7 @@
 extern "C" {
 #endif
 
-#include "../nv_base_include.h"
+#include  <nv_config.h>
 #include <stdio.h>
 #include <stdlib.h>
 #include <sys/stat.h>
