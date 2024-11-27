@@ -25,6 +25,9 @@
 #include "sys/nv_timer_task.h"
 #include "ipc/nv_mmap.h"
 #include "net/nv_unix_socket.h"
+#include "log/nv_log.h"
+
+
 
 #define CALCULATE_MD5   0
 #define NV_HASH_TABLE   0
@@ -64,6 +67,7 @@ void critical_section() {
 }
 
 int main() {
+    nv_log_debug("log new\n");
 
     //nv_time_main();    
     //nv_base64_main();
@@ -85,7 +89,7 @@ int main() {
 
  // nv_timer_task_main() ;
  //nv_unix_socket_server_main();
-nv_unix_socket_client_main();
+//nv_unix_socket_client_main();
  
 
 

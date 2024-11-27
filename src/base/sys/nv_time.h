@@ -7,6 +7,7 @@ extern "C" {
 #endif
 
 #include "../nv_base_include.h"
+#include "nv_cmd.h"
 
 int time_diff(char *time1_str,char *time2_str);
 int get_current_time(char * cur_time) ;
@@ -19,7 +20,8 @@ long long nv_time_now_ms() ;
 void nv_sleep_ms(int milliseconds) ;
 void nv_time_format(time_t timestamp, char* buf, int len, const char* format) ;
 
-
+// 设置系统时间的函数
+int nv_set_system_time(const char *time_str);
 
 
 

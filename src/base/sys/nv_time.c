@@ -158,7 +158,22 @@ void nv_sleep_ms(int milliseconds) {
 
 
 
+// 设置系统时间的函数,时间格式："2023-12-31 23:59:00"
+int nv_set_system_time(const char *time_str) {
+    char command[256];
 
+    // 使用 timedatectl 设置系统时间
+    snprintf(command, sizeof(command), "date -s  \"%s\"", time_str);
+
+    // 执行命令
+    int ret = nv_system(command);
+    if (ret != 0) {
+        fprintf(stderr, "设置系统时间失败\n");
+        return 1;
+    }
+
+    return 0;
+}
 
 
 
