@@ -1,5 +1,6 @@
 #include "nv_log.h"
 
+static pthread_mutex_t g_nv_log_mutex = PTHREAD_MUTEX_INITIALIZER;  // 互斥锁
 
 static char *log_info[] = 
 {
@@ -32,6 +33,7 @@ char *nv_log_get_info(nv_log_level_e level)
 static FILE *log_file = NULL;
 // 初始化日志文件
 int nv_log_init() {
+  
      // 获取当前时间
     time_t now = time(NULL);
     struct tm *t = localtime(&now);
@@ -46,16 +48,19 @@ int nv_log_init() {
     sprintf(filename, "/tmp/nv%slog",time_str);
         
     log_file = fopen(filename, "a");
-    if (log_file == NULL) {
+    if (log_file == NULL) {       
         return -1;
-    }
+    }  
     return 0;
+    
 }
 
 // 写日志
 void nv_log_write(const char *format, ...) {
+    pthread_mutex_lock(&g_nv_log_mutex);
     if (log_file == NULL) {
         if(nv_log_init()){
+             pthread_mutex_unlock(&g_nv_log_mutex);
              return ;
         }
     }
@@ -68,12 +73,15 @@ void nv_log_write(const char *format, ...) {
 
     //fprintf(log_file, "\n");
     fflush(log_file);
+    pthread_mutex_unlock(&g_nv_log_mutex);
 }
 
 // 关闭日志文件
 void nv_log_close(void) {
+     pthread_mutex_lock(&g_nv_log_mutex);
     if (log_file != NULL) {
         fclose(log_file);
         log_file = NULL;
     }
+    pthread_mutex_unlock(&g_nv_log_mutex);
 }

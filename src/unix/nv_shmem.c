@@ -6,19 +6,13 @@
  * 
  ***********************************************/
 
-
-
-
 #include <nv_linux_config.h>
 #include <nv_config.h>
 #include <nv_core.h>
 #include <nv_shmem.h>
-#include <nv_log.h>
 
 
-#define NV_HAVE_MAP_ANON 1
-
-#if (NV_HAVE_MAP_ANON)
+#if 0
 
 nv_int_t
 nv_shm_alloc(nv_shm_t *shm)
@@ -44,7 +38,7 @@ nv_shm_free(nv_shm_t *shm)
     }
 }
 
-#elif (NV_HAVE_MAP_DEVZERO)
+
 
 nv_int_t
 nv_shm_alloc(nv_shm_t *shm)
