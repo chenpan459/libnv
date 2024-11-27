@@ -1,5 +1,11 @@
 
 #include "nv_time.h"
+#include <nv_string.h>
+
+static const char* s_weekdays[] = {"Sunday", "Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday"};
+
+static const char* s_months[] = {"January", "February", "March", "April", "May", "June",
+    "July", "August", "September", "October", "November", "December"};
 
 
 /*********************
@@ -177,6 +183,29 @@ int nv_set_system_time(const char *time_str) {
 
 
 
+
+int month_atoi(const char* month) {
+    for (size_t i = 0; i < 12; ++i) {
+        if (strnicmp(month, s_months[i], strlen(month)) == 0)
+            return i+1;
+    }
+    return 0;
+}
+
+const char* month_itoa(int month) {
+    assert(month >= 1 && month <= 12);
+    return s_months[month-1];
+}
+
+
+datetime_t nv_compile_datetime() {
+    datetime_t dt;
+    char month[32];
+    sscanf(__DATE__, "%s %d %d", month, &dt.day, &dt.year);
+    sscanf(__TIME__, "%d:%d:%d", &dt.hour, &dt.min, &dt.sec);
+    dt.month = month_atoi(month);
+    return dt;
+}
 
 int nv_time_main(){
 

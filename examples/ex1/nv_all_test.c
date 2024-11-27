@@ -26,7 +26,7 @@
 #include <nv_mmap.h>
 #include <nv_unix_socket.h>
 #include <nv_log.h>
-
+#include <nv_version.h>
 
 
 #define CALCULATE_MD5   0
@@ -67,7 +67,7 @@ void critical_section() {
 }
 
 int main() {
-    nv_log_debug("log new\n");
+    nv_log_debug("compile_version: %s\n",hv_compile_version());
 
     //nv_time_main();    
     //nv_base64_main();

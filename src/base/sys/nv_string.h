@@ -23,6 +23,8 @@ char* nv_strcat(char *dest, const char *src);
 // 获取字符串长度
 size_t nv_strlen(const char *str);
 
+// 自己实现的 strnicmp 函数
+int strnicmp(const char *s1, const char *s2, size_t n) ;
 #ifdef __cplusplus
 }
 #endif

@@ -31,6 +31,8 @@
 #include <sys/select.h>
 #include <sys/poll.h>
 #include <termios.h>
+#include <assert.h>
+#include <strings.h> // 包含 strncasecmp 的头文件
 
 
 

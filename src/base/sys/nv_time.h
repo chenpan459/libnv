@@ -8,6 +8,17 @@ extern "C" {
 
 #include  <nv_config.h>
 #include "nv_cmd.h"
+#include <strings.h> // 包含 strncasecmp 的头文件
+
+typedef struct datetime_s {
+    int year;
+    int month;
+    int day;
+    int hour;
+    int min;
+    int sec;
+    int ms;
+} datetime_t;
 
 int time_diff(char *time1_str,char *time2_str);
 int get_current_time(char * cur_time) ;
@@ -23,7 +34,9 @@ void nv_time_format(time_t timestamp, char* buf, int len, const char* format) ;
 // 设置系统时间的函数
 int nv_set_system_time(const char *time_str);
 
-
+int month_atoi(const char* month) ;
+const char* month_itoa(int month) ;
+datetime_t nv_compile_datetime() ;
 
 int nv_time_main();
 #ifdef __cplusplus

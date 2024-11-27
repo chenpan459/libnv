@@ -9,6 +9,8 @@ extern "C" {
 #include <math.h>
 #include <stdio.h>
 
+
+
 // 加法
 double nv_add(double a, double b);
 
@@ -32,6 +34,7 @@ int nv_abs(int num);
 
 // 浮点数绝对值
 double nv_fabs(double num);
+
 
 
 #ifdef __cplusplus
