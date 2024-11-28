@@ -2,6 +2,7 @@
 #include <nv_socket.h>
 #include <nv_mem.h>
 
+
 int nv_tcp_init(nv_loop_t* loop, nv_tcp_t* tcp){
     tcp->socketfd = nv_tcp_socket_create();
     if(tcp->socketfd < 0){
@@ -10,9 +11,9 @@ int nv_tcp_init(nv_loop_t* loop, nv_tcp_t* tcp){
     return 0;
 }
 
-int nv_tcp_bind(nv_tcp_t* tcp,nv_char * ip,uint32_t port){
+int nv_tcp_bind(nv_tcp_t* tcp,uint32_t port){
 
-    if(nv_socket_bind(tcp->socketfd, ip,port) < 0){
+    if(nv_socket_bind(tcp->socketfd, port) < 0){
         nv_socket_close(tcp->socketfd);
         return -1;
     }
@@ -28,7 +29,7 @@ int nv_tcp_listen(nv_tcp_t* tcp, nv_int32 backlog){
     
     return 0;
 }
-nv_tcp_t* nv_tcp_accept(nv_tcp_t* tcp, nv_tcp_t* client){
+int nv_tcp_accept(nv_tcp_t* tcp, nv_tcp_t* client){
     
     client->socketfd = nv_tcp_socket_accept(tcp->socketfd);  
 

@@ -3,8 +3,7 @@
 /**************************************
  * 用于在一个字符串中查找指定字符最后一次出现的位置
  * *****************************/
-char *nv_strrchr(const char *str, int c)
-{
+char *nv_strrchr(const char *str, int c){
      return  strrchr(str, c);
 }
 
@@ -12,7 +11,6 @@ char *nv_strrchr(const char *str, int c)
  * 字符串比较大小
  * *****************************/
 int nv_strcmp(char *str1,char * str2 ) {
-
     return strcmp(str1, str2);
 }
 
@@ -22,7 +20,6 @@ int nv_strcmp(char *str1,char * str2 ) {
  * *****************************/
 int nv_str_toupper(char *str) {
      int i;
-
     // 计算字符串的长度
     int len = strlen(str);
     // 遍历字符串中的每个字符
@@ -51,7 +48,6 @@ int nv_str_tolower(char *str) {
     }
     // 打印转换后的字符串
     //printf("大写字符串: %s\n", str);
-
     return 0;
 }
 
@@ -70,24 +66,8 @@ void nv_format_string(char *buffer, size_t bufsize, const char *format, ...) {
  * 字符串拷贝
  * *****************************/
 char* nv_strcpy(char *str1,char * str2 ) {
-
     return strcpy(str1, str2);
 }
-
-
-/**************************************
- * 内存拷贝
- * *****************************/
-void* nv_memcpy(void *dest,void * src,size_t  n ) {
-
-    return memcpy(dest, src,n);
-}
-
-void* nv_memset(void *dest,int a,size_t  n ) {
-
-    return memset(dest, a,n);
-}
-
 
 
 // 字符串连接
@@ -99,9 +79,7 @@ size_t nv_strlen(const char *str) {
     return strlen(str);
 }
 
-
-
-// 自己实现的 strnicmp 函数
+// 用于不区分大小写地比较两个字符串的前 n 个字符
 int strnicmp(const char *s1, const char *s2, size_t n) {
     if (n == 0) {
         return 0;

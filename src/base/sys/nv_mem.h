@@ -1,5 +1,5 @@
 #ifndef _NV_MEM_H_INCLUDED_
-#define _NV_mem_H_INCLUDED_
+#define _NV_MEM_H_INCLUDED_
 
 #ifdef __cplusplus
 extern "C" {
@@ -26,6 +26,10 @@ void* nv_realloc(void* ptr, size_t size) ;
 // 封装 free 函数
 // 参数: ptr - 指向要释放的内存的指针
 void nv_free(void* ptr) ;
+
+
+void* nv_memcpy(void *dest,void * src,size_t  n ) ;
+void* nv_memset(void *dest,int a,size_t  n ) ;
 
 
 

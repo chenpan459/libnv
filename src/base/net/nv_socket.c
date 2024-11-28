@@ -22,11 +22,13 @@ int nv_udp_socket_create() {
 }
 
 // 绑定套接字到地址和端口
-int nv_socket_bind(int sockfd, const char* ip, int port) {
+int nv_socket_bind(int sockfd,int port) {
     struct sockaddr_in addr;
     addr.sin_family = AF_INET;
     addr.sin_port = htons(port);
-    inet_pton(AF_INET, ip, &addr.sin_addr);
+   // inet_pton(AF_INET, ip, &addr.sin_addr);
+    addr.sin_addr.s_addr = INADDR_ANY; // 绑定到系统的任意 IP 地址
+
 
     int bind_result = bind(sockfd, (struct sockaddr*)&addr, sizeof(addr));
     if (bind_result < 0) {
@@ -35,7 +37,11 @@ int nv_socket_bind(int sockfd, const char* ip, int port) {
     return bind_result;
 }
 
-// 监听连接
+/********************************************************
+ * 监听连接
+ * sockfd：这是一个指向 socket 文件描述符的整型变量，该文件描述符必须指向一个已经创建且未被绑定的 socket。
+ * backlog：这是一个整型参数，表示内核应该为相应 socket 维护的未完成连接的最大数量。这个参数指定了内核应该为该 socket 排队的最大连接个数。
+ * ************************************************************/
 int nv_tcp_socket_listen(int sockfd, int backlog) {
     int listen_result = listen(sockfd, backlog);
     if (listen_result < 0) {
@@ -93,11 +99,11 @@ int nv_socket_close(int sockfd) {
 }
 
 // 示例：简单的 TCP 服务器
-void run_tcp_server(const char* ip, int port) {
+void run_tcp_server(int port) {
     int server_fd = nv_tcp_socket_create();
     if (server_fd < 0) exit(EXIT_FAILURE);
 
-    if (nv_socket_bind(server_fd, ip, port) < 0) exit(EXIT_FAILURE);
+    if (nv_socket_bind(server_fd, port) < 0) exit(EXIT_FAILURE);
     if (nv_tcp_socket_listen(server_fd, 5) < 0) exit(EXIT_FAILURE);
 
     printf("等待客户端连接...\n");

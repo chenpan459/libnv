@@ -4,6 +4,7 @@
 #include <nv_version.h>
 #include <nv_socket.h>
 #include <nv_string.h>
+#include <nv_mem.h>
 
 
 int main() {

@@ -15,16 +15,15 @@ int nv_str_toupper(char *str);
 int nv_strcmp(char *str1,char * str2 );
 void nv_format_string(char *buffer, size_t bufsize, const char *format, ...);
 char* nv_strcpy(char *str1,char * str2 );
-void* nv_memcpy(void *dest,void * src,size_t  n ) ;
-void* nv_memset(void *dest,int a,size_t  n ) ;
 
 // 字符串连接
 char* nv_strcat(char *dest, const char *src);
 // 获取字符串长度
 size_t nv_strlen(const char *str);
 
-// 自己实现的 strnicmp 函数
+// 用于不区分大小写地比较两个字符串的前 n 个字符
 int strnicmp(const char *s1, const char *s2, size_t n) ;
+
 #ifdef __cplusplus
 }
 #endif

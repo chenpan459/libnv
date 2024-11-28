@@ -45,7 +45,7 @@ extern char log_prex[];
         time_t now = time(NULL); \
         struct tm *t = localtime(&now); \
         strftime(time_str, sizeof(time_str), "%Y-%m-%d %H:%M:%S", t); \
-        sprintf(log_prex, "[ %s %s:%d-%s", nv_log_get_info(level), filename(file), line,time_str);\
+        sprintf(log_prex, "[ %s %s:%d#%s", nv_log_get_info(level), filename(file), line,time_str);\
         printf(HEADER_FORMAT, log_prex); \
         printf(format, ##args); \
         nv_log_write(HEADER_FORMAT, log_prex); \

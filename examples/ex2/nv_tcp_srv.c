@@ -4,13 +4,20 @@
 #include <nv_version.h>
 #include <nv_socket.h>
 #include <nv_string.h>
+#include <nv_mem.h>
+
+
+// 打开另一个终端窗口，使用 nc 命令连接到 TCP 服务器：
+// nc 127.0.0.1 60000
 
 int main() {
 
+   // run_tcp_server("127.0.0.1",60000);
+#if 1
     nv_loop_t loop;
     nv_tcp_t  tcp;
     nv_int32  ret;
-    nv_tcp_t* client;
+    nv_tcp_t client;
     char buff[1024];
     nv_log_debug("compile_version: %s\n",hv_compile_version());
     
@@ -21,26 +28,26 @@ int main() {
     }
 
 
-    ret = nv_tcp_bind(&tcp,"127.0.0.1",60000);
+    ret = nv_tcp_bind(&tcp,8080);
     if(ret < 0){
         nv_log_debug("nv_tcp_connect failed\n");
         return -1;
     }
+    ret = nv_tcp_listen(&tcp,50);
+    nv_assert(ret== NV_SUCC,ret);
 
     while(1){
 
           nv_log_debug("waiting for connect\n");
-           nv_tcp_accept(&tcp,&client);
-        //   if(ret < 0){
-        //     nv_log_debug("nv_tcp_accept failed\n");
-        //     return -1;
-        //  }
+          ret = nv_tcp_accept(&tcp,&client);
+          nv_assert(ret == NV_SUCC,ret);
+       
          while(1){
 
-            nv_tcp_read(client,buff,1024);
+            nv_tcp_read(&client,buff,1024);
             nv_log_debug("recv:%s\n",buff);
             nv_memset(buff,0,1024);
-            nv_tcp_write(client,"hello",5);
+            nv_tcp_write(&client,"hello",5);
             sleep(1);
          } 
     }
@@ -50,7 +57,7 @@ int main() {
 
     return 0;
 
-    
+    #endif
 }
 
 

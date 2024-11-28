@@ -44,3 +44,13 @@ void nv_free(void* ptr) {
     free(ptr);
 }
 
+/**************************************
+ * 内存拷贝
+ * *****************************/
+void* nv_memcpy(void *dest,void * src,size_t  n ) {
+    return memcpy(dest, src,n);
+}
+
+void* nv_memset(void *dest,int a,size_t  n ) {
+    return memset(dest, a,n);
+}
