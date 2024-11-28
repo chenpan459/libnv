@@ -11,11 +11,33 @@ int nv_tcp_socket_create() {
         perror("nv_tcp_socket_create 失败");
     }
   
-   //设置SO_REUSEADDR选项，在重新启动服务之前，您可以设置socket选项SO_REUSEADDR，以允许立即重新使用地址和端口。
+   //设置SO_REUSEADDR选项，以允许立即重新使用地址和端口。
     setsockopt(sockfd, SOL_SOCKET, SO_REUSEADDR, &reuse, sizeof(reuse));
-
+   #if 0 
+ // 设置 SO_REUSEADDR 选项
+    setsockopt(sockfd, SOL_SOCKET, SO_REUSEADDR, &reuse, sizeof(reuse));
+    // 设置 SO_KEEPALIVE 选项,启用 TCP 保活机制
+    int keepalive = 1;
+    setsockopt(sockfd, SOL_SOCKET, SO_KEEPALIVE, &keepalive, sizeof(keepalive));
+    // 设置接收缓冲区大小
+    int rcvbuf_size = 1024 * 1024; // 1 MB
+    setsockopt(sockfd, SOL_SOCKET, SO_RCVBUF, &rcvbuf_size, sizeof(rcvbuf_size));
+    // 设置发送缓冲区大小
+    int sndbuf_size = 1024 * 1024; // 1 MB
+    setsockopt(sockfd, SOL_SOCKET, SO_SNDBUF, &sndbuf_size, sizeof(sndbuf_size));
+    // 设置延迟关闭选项
+    struct linger linger_opt = {1, 5}; // 启用延迟关闭，延迟时间为 5 秒
+    setsockopt(sockfd, SOL_SOCKET, SO_LINGER, &linger_opt, sizeof(linger_opt));
+    // 禁用 Nagle 算法
+    int nodelay = 1;
+    setsockopt(sockfd, IPPROTO_TCP, TCP_NODELAY, &nodelay, sizeof(nodelay));
+    // 设置 IP 数据包的生存时间（TTL）
+    int ttl = 64;
+    setsockopt(sockfd, IPPROTO_IP, IP_TTL, &ttl, sizeof(ttl));
+#endif
     return sockfd;
 }
+
 
 // 创建 UDP 套接字
 int nv_udp_socket_create() {
