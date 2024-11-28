@@ -29,11 +29,13 @@ int nv_tcp_listen(nv_tcp_t* tcp, nv_int32 backlog){
     
     return 0;
 }
-int nv_tcp_accept(nv_tcp_t* tcp, nv_tcp_t* client){
+nv_tcp_t* nv_tcp_accept(nv_tcp_t* tcp){
+
+    nv_tcp_t *client = nv_malloc(sizeof(nv_tcp_t));
     
     client->socketfd = nv_tcp_socket_accept(tcp->socketfd);  
 
-    return 0;
+    return client;
 }
 
 int nv_tcp_connect(nv_tcp_t* tcp, const nv_char* ip, nv_int32 port){

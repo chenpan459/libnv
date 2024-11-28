@@ -5,10 +5,15 @@
 
 // 创建 TCP 套接字
 int nv_tcp_socket_create() {
+    int reuse = 1;
     int sockfd = socket(AF_INET, SOCK_STREAM, 0);
     if (sockfd < 0) {
         perror("nv_tcp_socket_create 失败");
     }
+  
+   //设置SO_REUSEADDR选项，在重新启动服务之前，您可以设置socket选项SO_REUSEADDR，以允许立即重新使用地址和端口。
+    setsockopt(sockfd, SOL_SOCKET, SO_REUSEADDR, &reuse, sizeof(reuse));
+
     return sockfd;
 }
 
@@ -75,9 +80,10 @@ int nv_tcp_socket_connect(int sockfd, const char* ip, int port) {
     return connect_result;
 }
 
+
 // 发送数据
 ssize_t nv_socket_send(int sockfd, const void* buffer, size_t length, int flags) {
-    ssize_t send_result = send(sockfd, buffer, length, flags);
+    ssize_t send_result = send(sockfd, buffer, length, flags | MSG_NOSIGNAL);
     if (send_result < 0) {
         perror("nv_socket_send 失败");
     }

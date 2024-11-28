@@ -2,7 +2,7 @@
 
 
 // 封装线程属性设置接口
-int nv_init_thread_attr(pthread_attr_t *attr, int detach_state, size_t stack_size) {
+int nv_init_thread_attr(nv_pthread_attr_t *attr, int detach_state, size_t stack_size) {
     if (pthread_attr_init(attr) != 0) {
         return -1;
     }
@@ -21,17 +21,17 @@ int nv_init_thread_attr(pthread_attr_t *attr, int detach_state, size_t stack_siz
 }
 
 // 封装线程创建接口
-int nv_create_thread(pthread_t *thread, const pthread_attr_t *attr, thread_func_t func, void *arg) {
+int nv_create_thread(nv_pthread_t *thread, const nv_pthread_attr_t *attr, thread_func_t func, void *arg) {
     return pthread_create(thread, attr, func, arg);
 }
 
 // 封装线程等待接口
-int nv_join_thread(pthread_t thread) {
+int nv_join_thread(nv_pthread_t thread) {
     return pthread_join(thread, NULL);
 }
 
 // 封装线程分离接口
-int nv_detach_thread(pthread_t thread) {
+int nv_detach_thread(nv_pthread_t thread) {
     return pthread_detach(thread);
 }
 

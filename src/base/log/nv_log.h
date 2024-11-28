@@ -91,6 +91,15 @@ extern char log_prex[];
 }
 
 
+#define nv_assert_pointer(cond, ret) \
+{ \
+    if (!(cond)) \
+    { \
+        nv_log_error("!nv Assert, ret = -0x%X, %s:%d  (%s)\n", -ret, __FILE__, __LINE__, __func__); \
+        return NULL; \
+    } \
+}
+
 #ifdef __cplusplus
 }
 #endif
