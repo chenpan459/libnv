@@ -39,6 +39,15 @@ struct nv_loop_s {
   
 };
 
+struct nv_udp_s {
+    struct nv_handle_s handle;
+    int socketfd;
+    int port;
+    int family;
+    int type;
+    int protocol;
+    int flags; 
+};
 
 
 
@@ -47,6 +56,7 @@ struct nv_loop_s {
 typedef struct nv_handle_s nv_handle_t;
 typedef struct nv_tcp_s    nv_tcp_t;
 typedef struct nv_loop_s   nv_loop_t;
+typedef struct nv_udp_s    nv_udp_t;
 
 #ifdef __cplusplus
 }
