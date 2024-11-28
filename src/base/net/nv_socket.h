@@ -58,6 +58,8 @@ int nv_socket_close(int sockfd) ;
 void run_tcp_server(int port) ;
 void run_tcp_client(const char* server_ip, int server_port) ;
 
+ssize_t nv_udp_recvfrom(int sockfd, void *buffer, size_t length, struct sockaddr_in *src_addr) ;
+ssize_t nv_udp_sendto(int sockfd, const void *buffer, size_t length, const struct sockaddr_in *dest_addr) ;
 
 int nv_socket_main();
 #ifdef __cplusplus

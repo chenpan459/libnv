@@ -126,6 +126,29 @@ int nv_socket_close(int sockfd) {
     return close(sockfd);
 }
 
+// 发送 UDP 数据
+ssize_t nv_udp_sendto(int sockfd, const void *buffer, size_t length, const struct sockaddr_in *dest_addr) {
+    ssize_t send_result = sendto(sockfd, buffer, length, 0, (const struct sockaddr *)dest_addr, sizeof(*dest_addr));
+    if (send_result < 0) {
+        perror("nv_udp_sendto 失败");
+    }
+    return send_result;
+}
+
+// 接收 UDP 数据
+ssize_t nv_udp_recvfrom(int sockfd, void *buffer, size_t length, struct sockaddr_in *src_addr) {
+    socklen_t addr_len = sizeof(*src_addr);
+    ssize_t recv_result = recvfrom(sockfd, buffer, length, 0, (struct sockaddr *)src_addr, &addr_len);
+    if (recv_result < 0) {
+        perror("nv_udp_recvfrom 失败");
+    }
+    return recv_result;
+}
+
+
+
+
+
 // 示例：简单的 TCP 服务器
 void run_tcp_server(int port) {
     int server_fd = nv_tcp_socket_create();
@@ -169,7 +192,6 @@ void run_tcp_client(const char* server_ip, int server_port) {
 
     nv_socket_close(client_fd);
 }
-
 
 
 int nv_socket_main()
