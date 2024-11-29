@@ -14,15 +14,20 @@ SUBDIRS = src examples
 # 默认目标
 all: $(SUBDIRS)
 
+
 # 清理构建的子目录
 clean:
 	for dir in $(SUBDIRS); do \
+		if [ -f $$dir/Makefile ]; then \
 		$(MAKE) -C $$dir clean; \
-	done
+		fi \
+		done
 
 # 调用子目录的 Makefile
 $(SUBDIRS):
-	$(MAKE) -C $@
+	if [ -f $@/Makefile ]; then \
+		$(MAKE) -C $@; \
+	fi
 
 # 防止 make 执行时自动补全文件名
 .PHONY: all clean $(SUBDIRS)
