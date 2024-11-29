@@ -205,6 +205,166 @@ int nv_set_multicast_interface(int sockfd, const char *interface_ip) {
     return 0;
 }
 
+// 创建 IPv6 TCP 套接字
+int nv_tcp_socket_create_ipv6(void) {
+    int sockfd = socket(AF_INET6, SOCK_STREAM, 0);
+    if (sockfd < 0) {
+        perror("nv_tcp_socket_create_ipv6 失败");
+    }
+
+    // 设置常用的套接字选项
+    int reuse = 1;
+    nv_setsockopt(sockfd, SOL_SOCKET, SO_REUSEADDR, &reuse, sizeof(reuse));
+
+    int keepalive = 1;
+    nv_setsockopt(sockfd, SOL_SOCKET, SO_KEEPALIVE, &keepalive, sizeof(keepalive));
+
+    int rcvbuf_size = 1024 * 1024; // 1 MB
+    nv_setsockopt(sockfd, SOL_SOCKET, SO_RCVBUF, &rcvbuf_size, sizeof(rcvbuf_size));
+
+    int sndbuf_size = 1024 * 1024; // 1 MB
+    nv_setsockopt(sockfd, SOL_SOCKET, SO_SNDBUF, &sndbuf_size, sizeof(sndbuf_size));
+
+    struct linger linger_opt = {1, 5}; // 启用延迟关闭，延迟时间为 5 秒
+    nv_setsockopt(sockfd, SOL_SOCKET, SO_LINGER, &linger_opt, sizeof(linger_opt));
+
+    int nodelay = 1;
+    nv_setsockopt(sockfd, IPPROTO_TCP, TCP_NODELAY, &nodelay, sizeof(nodelay));
+
+    int ttl = 64;
+    nv_setsockopt(sockfd, IPPROTO_IPV6, IPV6_UNICAST_HOPS, &ttl, sizeof(ttl));
+
+    return sockfd;
+}
+// 绑定 IPv6 套接字到地址和端口
+int nv_socket_bind_ipv6(int sockfd, int port) {
+    struct sockaddr_in6 addr;
+    memset(&addr, 0, sizeof(addr));
+    addr.sin6_family = AF_INET6;
+    addr.sin6_port = htons(port);
+    addr.sin6_addr = in6addr_any; // 绑定到系统的任意 IPv6 地址
+
+    int bind_result = bind(sockfd, (struct sockaddr *)&addr, sizeof(addr));
+    if (bind_result < 0) {
+        perror("nv_socket_bind_ipv6 失败");
+    }
+    return bind_result;
+}
+
+// 连接到 IPv6 服务器
+int nv_tcp_socket_connect_ipv6(int sockfd, const char *ip, int port) {
+    struct sockaddr_in6 server_addr;
+    memset(&server_addr, 0, sizeof(server_addr));
+    server_addr.sin6_family = AF_INET6;
+    server_addr.sin6_port = htons(port);
+    if (inet_pton(AF_INET6, ip, &server_addr.sin6_addr) <= 0) {
+        perror("inet_pton 失败");
+        return -1;
+    }
+
+    if (connect(sockfd, (struct sockaddr *)&server_addr, sizeof(server_addr)) < 0) {
+        perror("nv_tcp_socket_connect_ipv6 失败");
+        return -1;
+    }
+    return 0;
+}
+
+
+// 创建 IPv6 UDP 套接字
+int nv_udp_socket_create_ipv6(void) {
+    int sockfd = socket(AF_INET6, SOCK_DGRAM, 0);
+    if (sockfd < 0) {
+        perror("nv_udp_socket_create_ipv6 失败");
+    }
+
+    int broadcast = 1;
+    nv_setsockopt(sockfd, SOL_SOCKET, SO_BROADCAST, &broadcast, sizeof(broadcast));
+
+    return sockfd;
+}
+
+// 发送 IPv6 UDP 数据
+ssize_t nv_udp_socket_sendto_ipv6(int sockfd, const void *buffer, size_t length, const struct sockaddr_in6 *dest_addr) {
+    ssize_t send_result = sendto(sockfd, buffer, length, 0, (const struct sockaddr *)dest_addr, sizeof(*dest_addr));
+    if (send_result < 0) {
+        perror("nv_udp_sendto_ipv6 失败");
+    }
+    return send_result;
+}
+// 接收 IPv6 UDP 数据
+ssize_t nv_udp_socket_recvfrom_ipv6(int sockfd, void *buffer, size_t length, struct sockaddr_in6 *src_addr) {
+    socklen_t addr_len = sizeof(*src_addr);
+    ssize_t recv_result = recvfrom(sockfd, buffer, length, 0, (struct sockaddr *)src_addr, &addr_len);
+    if (recv_result < 0) {
+        perror("nv_udp_recvfrom_ipv6 失败");
+    }
+    return recv_result;
+}
+
+// 加入 IPv6 组播组
+int nv_join_multicast_group_ipv6(int sockfd, const char *multicast_ip, const char *interface_ip) {
+    struct ipv6_mreq mreq;
+    if (inet_pton(AF_INET6, multicast_ip, &mreq.ipv6mr_multiaddr) <= 0) {
+        perror("inet_pton 失败");
+        return -1;
+    }
+    mreq.ipv6mr_interface = if_nametoindex(interface_ip);
+    if (mreq.ipv6mr_interface == 0) {
+        perror("if_nametoindex 失败");
+        return -1;
+    }
+    if (setsockopt(sockfd, IPPROTO_IPV6, IPV6_JOIN_GROUP, &mreq, sizeof(mreq)) < 0) {
+        perror("nv_join_multicast_group_ipv6 失败");
+        return -1;
+    }
+    return 0;
+}
+
+// 离开 IPv6 组播组
+int nv_leave_multicast_group_ipv6(int sockfd, const char *multicast_ip, const char *interface_ip) {
+    struct ipv6_mreq mreq;
+    if (inet_pton(AF_INET6, multicast_ip, &mreq.ipv6mr_multiaddr) <= 0) {
+        perror("inet_pton 失败");
+        return -1;
+    }
+    mreq.ipv6mr_interface = if_nametoindex(interface_ip);
+    if (mreq.ipv6mr_interface == 0) {
+        perror("if_nametoindex 失败");
+        return -1;
+    }
+    if (setsockopt(sockfd, IPPROTO_IPV6, IPV6_LEAVE_GROUP, &mreq, sizeof(mreq)) < 0) {
+        perror("nv_leave_multicast_group_ipv6 失败");
+        return -1;
+    }
+    return 0;
+}
+
+// 设置 IPv6 组播 TTL
+int nv_set_multicast_ttl_ipv6(int sockfd, int ttl) {
+    if (setsockopt(sockfd, IPPROTO_IPV6, IPV6_MULTICAST_HOPS, &ttl, sizeof(ttl)) < 0) {
+        perror("nv_set_multicast_ttl_ipv6 失败");
+        return -1;
+    }
+    return 0;
+}
+
+// 设置 IPv6 组播接口
+int nv_set_multicast_interface_ipv6(int sockfd, const char *interface_ip) {
+    unsigned int ifindex = if_nametoindex(interface_ip);
+    if (ifindex == 0) {
+        perror("if_nametoindex 失败");
+        return -1;
+    }
+    if (setsockopt(sockfd, IPPROTO_IPV6, IPV6_MULTICAST_IF, &ifindex, sizeof(ifindex)) < 0) {
+        perror("nv_set_multicast_interface_ipv6 失败");
+        return -1;
+    }
+    return 0;
+}
+
+
+
+
 // 示例：简单的 TCP 服务器
 void run_tcp_server(int port) {
     int server_fd = nv_tcp_socket_create();

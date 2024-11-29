@@ -6,6 +6,10 @@ extern "C" {
 #endif
 
 #include "../nv_config.h"
+#include <arpa/inet.h>
+#include <sys/socket.h>
+#include <netinet/tcp.h>
+#include <netinet/in.h>
 
 //setsockopt 函数用于设置套接字选项，这些选项可以控制套接字的行为。以下是一些常用的套接字选项：
 #define  NV_SO_REUSEADDR    SO_REUSEADDR // 允许套接字绑定到一个已经被使用（在TIME_WAIT状态）的本地地址。
@@ -65,15 +69,36 @@ ssize_t nv_udp_socket_sendto(int sockfd, const void *buffer, size_t length, cons
 
 // 加入组播组
 int nv_join_multicast_group(int sockfd, const char *multicast_ip, const char *interface_ip);
-
 // 离开组播组
 int nv_leave_multicast_group(int sockfd, const char *multicast_ip, const char *interface_ip);
-
 // 设置组播 TTL
 int nv_set_multicast_ttl(int sockfd, int ttl);
-
 // 设置组播接口
 int nv_set_multicast_interface(int sockfd, const char *interface_ip);
+
+
+// IPv6 套接字相关函数
+int nv_tcp_socket_create_ipv6();
+int nv_udp_socket_create_ipv6();
+int nv_socket_bind_ipv6(int sockfd, int port);
+int nv_tcp_socket_connect_ipv6(int sockfd, const char *ip, int port);
+
+ssize_t nv_udp_socket_sendto_ipv6(int sockfd, const void *buffer, size_t length, const struct sockaddr_in6 *dest_addr);
+ssize_t nv_udp_socket_recvfrom_ipv6(int sockfd, void *buffer, size_t length, struct sockaddr_in6 *src_addr);
+
+// 加入 IPv6 组播组
+int nv_join_multicast_group_ipv6(int sockfd, const char *multicast_ip, const char *interface_ip);
+// 离开 IPv6 组播组
+int nv_leave_multicast_group_ipv6(int sockfd, const char *multicast_ip, const char *interface_ip);
+// 设置 IPv6 组播 TTL
+int nv_set_multicast_ttl_ipv6(int sockfd, int ttl);
+// 设置 IPv6 组播接口
+int nv_set_multicast_interface_ipv6(int sockfd, const char *interface_ip);
+
+
+
+
+
 
 
 int nv_socket_main();
