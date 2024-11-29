@@ -7,6 +7,7 @@
 #include <nv_mem.h>
 #include <nv_sys.h>
 #include <nv_thread.h>
+#include <nv_udp.h>
 
 
 /*************************************
@@ -36,30 +37,6 @@
  nc 127.0.0.1 60000
 
 *********************/
-void *client_thread(void *arg){
-    nv_udp_t *client = (nv_udp_t*)arg;
-    char buff[1024];
-    int len=0;
-    nv_log_debug("client_thread enter\n");
-    if(client == NULL){
-        return NULL;
-    }
-
-    while(1){
-        len = nv_udp_read(client,buff,1024);
-        nv_assert_pointer(len>0,len);
-        nv_log_debug("recv:%s\n",buff);
-        nv_memset(buff,0,1024);
-        len = nv_udp_write(client,"hello",5);
-        nv_assert_pointer(len>0,len);
-        nv_sleep(1);
-    }
-    nv_udp_close(client);
-    nv_free(client);
-    nv_log_debug("client_thread exit\n");
-    return NULL;
-}
-
 
 
 int main() {
@@ -67,7 +44,8 @@ int main() {
     nv_loop_t loop;
     nv_udp_t  udp;
     nv_int32  ret;
-    nv_udp_t *client;
+    char buff[1024];
+    int len=0;
  
     nv_log_debug("compile_version: %s\n",hv_compile_version());
     
@@ -82,16 +60,17 @@ int main() {
         nv_log_debug("nv_udp_connect failed\n");
         return -1;
     }
-    ret = nv_udp_listen(&udp,50);
-    nv_assert(ret== NV_SUCC,ret);
-
     while(1){
 
-          nv_log_debug("waiting for connect\n");
-          client = nv_udp_accept(&udp);
-          nv_assert(client != NULL,NV_FAIL);
-          nv_pthread_t tid;
-          nv_create_thread(&tid,NULL,client_thread,(void*)client);
+      
+        len = nv_udp_read(&udp,buff,1024);
+        nv_assert_pointer(len>0,len);
+        nv_log_debug("recv:%s\n",buff);
+        nv_memset(buff,0,1024);
+        len = nv_udp_sendto(&udp,"hello",5,&udp.src_addr);
+        nv_assert_pointer(len>0,len);
+        nv_sleep(1);
+ 
     }
     
     nv_udp_close(&udp);

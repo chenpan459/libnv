@@ -8,7 +8,9 @@ CFLAGS = -Wall
 LDFLAGS = 
 
 # 定义需要构建的子目录
-SUBDIRS = ex0 ex1 ex2
+#SUBDIRS = ex0 ex1 ex2 ex3
+SUBDIRS = $(shell find . -maxdepth 1 -type d ! -name .)
+
 
 # 默认目标
 all: $(SUBDIRS)

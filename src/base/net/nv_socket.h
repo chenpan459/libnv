@@ -49,6 +49,7 @@ extern "C" {
 int nv_tcp_socket_create() ;
 int nv_udp_socket_create() ;
 int nv_socket_bind(int sockfd, int port) ;
+int nv_setsockopt(int sockfd, int level, int optname, const void *optval, socklen_t optlen) ;
 int nv_tcp_socket_listen(int sockfd, int backlog) ;
 int nv_tcp_socket_accept(int sockfd) ;
 int nv_tcp_socket_connect(int sockfd, const char* ip, int port);
@@ -58,8 +59,8 @@ int nv_socket_close(int sockfd) ;
 void run_tcp_server(int port) ;
 void run_tcp_client(const char* server_ip, int server_port) ;
 
-ssize_t nv_udp_recvfrom(int sockfd, void *buffer, size_t length, struct sockaddr_in *src_addr) ;
-ssize_t nv_udp_sendto(int sockfd, const void *buffer, size_t length, const struct sockaddr_in *dest_addr) ;
+ssize_t nv_udp_socket_recvfrom(int sockfd, void *buffer, size_t length, struct sockaddr_in *src_addr) ;
+ssize_t nv_udp_socket_sendto(int sockfd, const void *buffer, size_t length, const struct sockaddr_in *dest_addr) ;
 
 int nv_socket_main();
 #ifdef __cplusplus

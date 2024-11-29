@@ -7,16 +7,16 @@ CFLAGS = -Wall $(foreach dir, $(INCLUDE_DIRS), -I$(dir))
 #CFLAGS = -Wall -Wextra -I../../src
 LDFLAGS = -L../../lib -lnv -pthread -lrt -lusb-1.0 -lm -ldl
 
-TARGETS = nv_tcp_cli nv_tcp_srv
+TARGETS = nv_udp_cli nv_udp_srv
 
 all: $(TARGETS)
 
 # 生成 nv_tcp_cli 可执行文件
-nv_tcp_cli: nv_tcp_cli.c
+nv_udp_cli: nv_udp_cli.c
 	$(CC) $(CFLAGS) $^ -o $@ $(LDFLAGS)
 
 # 生成 nv_tcp_srv 可执行文件
-nv_tcp_srv: nv_tcp_srv.c
+nv_udp_srv: nv_udp_srv.c
 	$(CC) $(CFLAGS) $^ -o $@ $(LDFLAGS)
 
 clean:

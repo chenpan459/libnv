@@ -45,6 +45,9 @@ int nv_udp_socket_create() {
     if (sockfd < 0) {
         perror("nv_udp_socket_create 失败");
     }
+    int broadcast = 1;
+    nv_setsockopt(sockfd, SOL_SOCKET, SO_BROADCAST, &broadcast, sizeof(broadcast));
+
     return sockfd;
 }
 
@@ -62,6 +65,16 @@ int nv_socket_bind(int sockfd,int port) {
         perror("nv_socket_bind 失败");
     }
     return bind_result;
+}
+
+
+// 设置套接字选项
+int nv_setsockopt(int sockfd, int level, int optname, const void *optval, socklen_t optlen) {
+    int result = setsockopt(sockfd, level, optname, optval, optlen);
+    if (result < 0) {
+        perror("nv_setsockopt 失败");
+    }
+    return result;
 }
 
 /********************************************************
@@ -127,7 +140,7 @@ int nv_socket_close(int sockfd) {
 }
 
 // 发送 UDP 数据
-ssize_t nv_udp_sendto(int sockfd, const void *buffer, size_t length, const struct sockaddr_in *dest_addr) {
+ssize_t nv_udp_socket_sendto(int sockfd, const void *buffer, size_t length, const struct sockaddr_in *dest_addr) {
     ssize_t send_result = sendto(sockfd, buffer, length, 0, (const struct sockaddr *)dest_addr, sizeof(*dest_addr));
     if (send_result < 0) {
         perror("nv_udp_sendto 失败");
@@ -136,7 +149,7 @@ ssize_t nv_udp_sendto(int sockfd, const void *buffer, size_t length, const struc
 }
 
 // 接收 UDP 数据
-ssize_t nv_udp_recvfrom(int sockfd, void *buffer, size_t length, struct sockaddr_in *src_addr) {
+ssize_t nv_udp_socket_recvfrom(int sockfd, void *buffer, size_t length, struct sockaddr_in *src_addr) {
     socklen_t addr_len = sizeof(*src_addr);
     ssize_t recv_result = recvfrom(sockfd, buffer, length, 0, (struct sockaddr *)src_addr, &addr_len);
     if (recv_result < 0) {
@@ -193,6 +206,40 @@ void run_tcp_client(const char* server_ip, int server_port) {
     nv_socket_close(client_fd);
 }
 
+// 示例：简单的 UDP 服务器
+int udp_server_main() {
+
+    // 创建 UDP 套接字
+    int udp_sockfd = nv_udp_socket_create();
+    if (udp_sockfd < 0) {
+        return 1;
+    }
+
+    // 绑定 UDP 套接字到端口 9090
+    if (nv_socket_bind(udp_sockfd, 9090) < 0) {
+        return 1;
+    }
+
+    // 接收数据
+    char buffer[1024];
+    struct sockaddr_in src_addr;
+    while (1) {
+        ssize_t bytes_received = nv_udp_socket_recvfrom(udp_sockfd, buffer, sizeof(buffer), &src_addr);
+        if (bytes_received > 0) {
+            buffer[bytes_received] = '\0';
+            printf("接收到: %s\n", buffer);
+
+            // 发送响应
+            const char *response = "Hello, UDP Client!";
+            nv_udp_socket_sendto(udp_sockfd, response, strlen(response), &src_addr);
+        }
+    }
+
+    // 关闭套接字
+    nv_socket_close(udp_sockfd);
+
+    return 0;
+}
 
 int nv_socket_main()
 {

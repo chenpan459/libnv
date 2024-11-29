@@ -46,7 +46,9 @@ struct nv_udp_s {
     int family;
     int type;
     int protocol;
-    int flags; 
+    int flags;
+    struct sockaddr_in src_addr; 
+    struct sockaddr_in dest_addr;
 };
 
 

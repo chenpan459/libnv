@@ -5,6 +5,9 @@
 #include <nv_socket.h>
 #include <nv_string.h>
 #include <nv_mem.h>
+#include <nv_sys.h>
+#include <nv_thread.h>
+#include <nv_udp.h>
 
 
 int main() {
@@ -20,14 +23,15 @@ int main() {
         nv_log_debug("nv_udp_init failed\n");
         return -1;
     }
-    ret = nv_udp_connect(&udp,"172.21.17.184",60000);
+
+    ret = nv_udp_bind(&udp,8080);
     if(ret < 0){
         nv_log_debug("nv_udp_connect failed\n");
         return -1;
     }
 
     while(1){
-          nv_udp_write(&udp,"hello",5);
+          nv_udp_write(&udp,"hello",5,"172.21.17.184",8080);
           sleep(1);
           nv_udp_read(&udp,buff,1024);
           nv_log_debug("recv:%s\n",buff);

@@ -9,6 +9,7 @@ LDFLAGS =
 
 # 定义需要构建的子目录
 SUBDIRS = src examples
+#SUBDIRS = $(shell find . -maxdepth 1 -type d ! -name .)
 
 # 默认目标
 all: $(SUBDIRS)
