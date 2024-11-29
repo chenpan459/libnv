@@ -161,6 +161,49 @@ ssize_t nv_udp_socket_recvfrom(int sockfd, void *buffer, size_t length, struct s
 
 
 
+// 加入组播组
+int nv_join_multicast_group(int sockfd, const char *multicast_ip, const char *interface_ip) {
+    struct ip_mreq mreq;
+    mreq.imr_multiaddr.s_addr = inet_addr(multicast_ip);
+    mreq.imr_interface.s_addr = inet_addr(interface_ip);
+    if (setsockopt(sockfd, IPPROTO_IP, IP_ADD_MEMBERSHIP, &mreq, sizeof(mreq)) < 0) {
+        perror("nv_join_multicast_group 失败");
+        return -1;
+    }
+    return 0;
+}
+
+// 离开组播组
+int nv_leave_multicast_group(int sockfd, const char *multicast_ip, const char *interface_ip) {
+    struct ip_mreq mreq;
+    mreq.imr_multiaddr.s_addr = inet_addr(multicast_ip);
+    mreq.imr_interface.s_addr = inet_addr(interface_ip);
+    if (setsockopt(sockfd, IPPROTO_IP, IP_DROP_MEMBERSHIP, &mreq, sizeof(mreq)) < 0) {
+        perror("nv_leave_multicast_group 失败");
+        return -1;
+    }
+    return 0;
+}
+
+// 设置组播 TTL
+int nv_set_multicast_ttl(int sockfd, int ttl) {
+    if (setsockopt(sockfd, IPPROTO_IP, IP_MULTICAST_TTL, &ttl, sizeof(ttl)) < 0) {
+        perror("nv_set_multicast_ttl 失败");
+        return -1;
+    }
+    return 0;
+}
+
+// 设置组播接口
+int nv_set_multicast_interface(int sockfd, const char *interface_ip) {
+    struct in_addr local_interface;
+    local_interface.s_addr = inet_addr(interface_ip);
+    if (setsockopt(sockfd, IPPROTO_IP, IP_MULTICAST_IF, &local_interface, sizeof(local_interface)) < 0) {
+        perror("nv_set_multicast_interface 失败");
+        return -1;
+    }
+    return 0;
+}
 
 // 示例：简单的 TCP 服务器
 void run_tcp_server(int port) {

@@ -7,7 +7,7 @@ CFLAGS = -Wall $(foreach dir, $(INCLUDE_DIRS), -I$(dir))
 #CFLAGS = -Wall -Wextra -I../../src
 LDFLAGS = -L../../lib -lnv -pthread -lrt -lusb-1.0 -lm -ldl
 
-TARGETS = nv_udp_cli nv_udp_srv
+TARGETS = nv_udp_cli nv_udp_srv multicast_ipv4
 
 all: $(TARGETS)
 
@@ -17,6 +17,11 @@ nv_udp_cli: nv_udp_cli.c
 
 # 生成 nv_tcp_srv 可执行文件
 nv_udp_srv: nv_udp_srv.c
+	$(CC) $(CFLAGS) $^ -o $@ $(LDFLAGS)
+
+
+# 生成 nv_tcp_srv 可执行文件
+multicast_ipv4: multicast_ipv4.c
 	$(CC) $(CFLAGS) $^ -o $@ $(LDFLAGS)
 
 clean:

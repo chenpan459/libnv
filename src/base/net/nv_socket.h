@@ -62,6 +62,20 @@ void run_tcp_client(const char* server_ip, int server_port) ;
 ssize_t nv_udp_socket_recvfrom(int sockfd, void *buffer, size_t length, struct sockaddr_in *src_addr) ;
 ssize_t nv_udp_socket_sendto(int sockfd, const void *buffer, size_t length, const struct sockaddr_in *dest_addr) ;
 
+
+// 加入组播组
+int nv_join_multicast_group(int sockfd, const char *multicast_ip, const char *interface_ip);
+
+// 离开组播组
+int nv_leave_multicast_group(int sockfd, const char *multicast_ip, const char *interface_ip);
+
+// 设置组播 TTL
+int nv_set_multicast_ttl(int sockfd, int ttl);
+
+// 设置组播接口
+int nv_set_multicast_interface(int sockfd, const char *interface_ip);
+
+
 int nv_socket_main();
 #ifdef __cplusplus
 }
