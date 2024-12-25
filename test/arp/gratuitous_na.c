@@ -10,77 +10,14 @@
 #include <netinet/icmp6.h>
 #include <netinet/ip6.h>
 #include <netpacket/packet.h>
-#include <ifaddrs.h>
-#include <arpa/inet.h>
-#include <net/if.h>
+
 #define BUFFER_SIZE 128
 
 /* IPv6 的 Gratuitous ARP 等效操作是发送邻居通告（Neighbor Advertisement，NA）消息
 
    使用方法:
-   sudo ./gratuitous_nav6 eth0 fe80::1
+   sudo ./gratuitous_na eth0 fe80::1
 */
-unsigned short checksum(void *b, int len) {    
-    unsigned short *buf = b; 
-    unsigned int sum = 0; 
-    unsigned short result; 
-
-    for (sum = 0; len > 1; len -= 2) {
-        sum += *buf++;
-    }
-    if (len == 1) {
-        sum += *(unsigned char *)buf;
-    }
-    sum = (sum >> 16) + (sum & 0xFFFF);
-    sum += (sum >> 16);
-    result = ~sum;
-    return result;
-}
-
-unsigned short icmp6_checksum(struct ip6_hdr *ip6h, struct nd_neighbor_advert *ndh, int len) {
-    struct {
-        struct in6_addr src;
-        struct in6_addr dst;
-        uint32_t len;
-        uint8_t zero[3];
-        uint8_t nxt;
-    } pseudo_header;
-    unsigned char buf[BUFFER_SIZE + sizeof(pseudo_header)];
-    memset(&pseudo_header, 0, sizeof(pseudo_header));
-    pseudo_header.src = ip6h->ip6_src;
-    pseudo_header.dst = ip6h->ip6_dst;
-    pseudo_header.len = htonl(len);
-    pseudo_header.nxt = IPPROTO_ICMPV6;
-
-    memcpy(buf, &pseudo_header, sizeof(pseudo_header));
-    memcpy(buf + sizeof(pseudo_header), ndh, len);
-
-    return checksum(buf, sizeof(pseudo_header) + len);
-}
-
-int get_ipv6_addr() {
-    struct ifaddrs *ifaddr, *ifa;
-    char addr[INET6_ADDRSTRLEN];
-
-    if (getifaddrs(&ifaddr) == -1) {
-        perror("getifaddrs");
-        exit(EXIT_FAILURE);
-    }
-
-    for (ifa = ifaddr; ifa != NULL; ifa = ifa->ifa_next) {
-        if (ifa->ifa_addr == NULL)
-            continue;
-
-        if (ifa->ifa_addr->sa_family == AF_INET6 && strcmp(ifa->ifa_name, "eth0") == 0) {
-            struct sockaddr_in6 *sa = (struct sockaddr_in6 *)ifa->ifa_addr;
-            inet_ntop(AF_INET6, &sa->sin6_addr, addr, sizeof(addr));
-            printf("IPv6 address of eth0: %s\n", addr);
-        }
-    }
-
-    freeifaddrs(ifaddr);
-    return 0;
-}
 int main(int argc, char *argv[]) {
     int sockfd;
     struct ifreq ifr;
@@ -154,7 +91,23 @@ int main(int argc, char *argv[]) {
     device.sll_halen = htons(6);
 
     // 计算 ICMPv6 校验和
-    na_header->nd_na_cksum = icmp6_checksum(ip6_header, na_header, ntohs(ip6_header->ip6_plen));
+    struct {
+        struct in6_addr src;
+        struct in6_addr dst;
+        uint32_t len;
+        uint8_t zero[3];
+        uint8_t nxt;
+    } pseudo_header;
+    memset(&pseudo_header, 0, sizeof(pseudo_header));
+    pseudo_header.src = ip6_header->ip6_src;
+    pseudo_header.dst = ip6_header->ip6_dst;
+    pseudo_header.len = ip6_header->ip6_plen;
+    pseudo_header.nxt = ip6_header->ip6_nxt;
+
+    unsigned char cksum_buffer[BUFFER_SIZE + sizeof(pseudo_header)];
+    memcpy(cksum_buffer, &pseudo_header, sizeof(pseudo_header));
+    memcpy(cksum_buffer + sizeof(pseudo_header), na_header, ntohs(ip6_header->ip6_plen));
+    na_header->nd_na_cksum = csum_ipv6_magic(&ip6_header->ip6_src, &ip6_header->ip6_dst, ntohs(ip6_header->ip6_plen), IPPROTO_ICMPV6, csum_partial(cksum_buffer, sizeof(cksum_buffer), 0));
 
     // 发送邻居通告消息
     if (sendto(sockfd, buffer, BUFFER_SIZE, 0, (struct sockaddr *) &device, sizeof(device)) < 0) {
@@ -168,8 +121,3 @@ int main(int argc, char *argv[]) {
     close(sockfd);
     return 0;
 }
-
-
-
-
-
