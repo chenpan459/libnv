@@ -20,6 +20,22 @@ add_library(nv SHARED ${SOURCES})
 set_target_properties(nv PROPERTIES LINKER_LANGUAGE C)
 
 
+#################### 定义宏开关###############################
+add_definitions(-DENABLE_FEATURE)
+# 或者使用 target_compile_definitions
+# target_compile_definitions(nv PRIVATE ENABLE_FEATURE)
+##############################################################
+
+###################### 定义选项开关##########################
+#option(ENABLE_GMT_0105_RNG "Enable GM/T 0105 Software RNG" OFF)
+## 根据选项开关定义宏
+#if(ENABLE_GMT_0105_RNG)
+#    add_definitions(-DENABLE_GMT_0105_RNG)
+#    # 或者使用 target_compile_definitions
+#    # target_compile_definitions(nv PRIVATE ENABLE_GMT_0105_RNG)
+#endif()
+###################################################################
+
 # 添加可执行文件
 add_executable(arp_aging_message ${PROJECT_SOURCE_DIR}/test/arp/arp_aging_message.c)
 
