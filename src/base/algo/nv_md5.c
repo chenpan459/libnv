@@ -46,37 +46,46 @@ void MD5Init(MD5_CTX *context) {
 }
 
 // MD5 变换
+// MD5Transform函数用于对MD5算法中的一个64字节块进行转换
 void MD5Transform(uint32_t state[4], const uint8_t block[64]) {
+    // 初始化a, b, c, d为当前状态的四个32位值
     uint32_t a = state[0], b = state[1], c = state[2], d = state[3], x[16];
 
+    // 将64字节的输入块转换为16个32位的整数
     for (int i = 0, j = 0; i < 16; ++i, j += 4)
         x[i] = (uint32_t)(block[j]) | ((uint32_t)(block[j+1]) << 8) |
                ((uint32_t)(block[j+2]) << 16) | ((uint32_t)(block[j+3]) << 24);
 
-    // 主循环
+    // 主循环，进行64次迭代
     for (int i = 0; i < 64; i++) {
         uint32_t f, g;
+        // 根据当前迭代次数选择不同的函数和索引
         if (i < 16) {
-            f = F(b, c, d);
-            g = i;
+            f = F(b, c, d); // 使用函数F
+            g = i;          // 索引为i
         } else if (i < 32) {
-            f = G(b, c, d);
-            g = (5 * i + 1) % 16;
+            f = G(b, c, d); // 使用函数G
+            g = (5 * i + 1) % 16; // 索引为(5 * i + 1) % 16
         } else if (i < 48) {
-            f = H(b, c, d);
-            g = (3 * i + 5) % 16;
+            f = H(b, c, d); // 使用函数H
+            g = (3 * i + 5) % 16; // 索引为(3 * i + 5) % 16
         } else {
-            f = I(b, c, d);
-            g = (7 * i) % 16;
+            f = I(b, c, d); // 使用函数I
+            g = (7 * i) % 16; // 索引为(7 * i) % 16
         }
 
+        // 临时保存d的值
         uint32_t temp = d;
+        // 更新d, c, b的值
         d = c;
         c = b;
+        // 更新b的值，包括旋转左移操作
         b = b + ROTATE_LEFT((a + f + K[i] + x[g]), 7);
+        // 更新a的值为临时保存的d的值
         a = temp;
     }
 
+    // 更新状态数组
     state[0] += a;
     state[1] += b;
     state[2] += c;

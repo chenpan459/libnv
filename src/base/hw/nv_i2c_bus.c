@@ -2,27 +2,34 @@
 
 
 // 打开 I2C 设备
+// 定义一个函数，用于打开I2C设备并返回一个指向nv_i2c_t结构体的指针
 nv_i2c_t* nv_i2c_open(const char* i2c_device) {
+    // 动态分配内存用于存储nv_i2c_t结构体
     nv_i2c_t* i2c = (nv_i2c_t*)malloc(sizeof(nv_i2c_t));
+    // 检查内存分配是否成功，如果失败则打印错误信息并返回NULL
     if (!i2c) {
         perror("NV: Failed to allocate memory for I2C object");
         return NULL;
     }
 
-    // 打开 I2C 设备文件
+    // 打开 I2C 设备文件，以读写模式打开
     i2c->fd = open(i2c_device, O_RDWR);
+    // 检查文件描述符是否为-1，如果是则表示打开失败，打印错误信息，释放之前分配的内存，并返回NULL
     if (i2c->fd == -1) {
         perror("NV: Failed to open I2C device");
         free(i2c);
         return NULL;
     }
 
+    // 如果成功打开I2C设备，返回指向nv_i2c_t结构体的指针
     return i2c;
 }
 
 // 设置 I2C 从设备地址
 int nv_i2c_set_address(nv_i2c_t* i2c, int addr) {
+    // 检查传入的 i2c 结构体指针是否为空
     if (!i2c) {
+        // 如果为空，返回错误码 -1
         return -1;
     }
 
@@ -38,11 +45,18 @@ int nv_i2c_set_address(nv_i2c_t* i2c, int addr) {
 }
 
 // 写入 I2C 设备
+// 定义一个函数nv_i2c_write，用于通过I2C接口写入数据
+// 参数i2c是指向nv_i2c_t结构体的指针，data是要写入的数据，size是数据的长度
+// 返回值为ssize_t类型，表示写入的字节数，若出错则返回-1
 ssize_t nv_i2c_write(nv_i2c_t* i2c, const char* data, size_t size) {
+    // 检查传入的i2c指针是否为空，如果为空则返回-1表示错误
     if (!i2c) {
         return -1;
     }
 
+    // 调用write系统调用，将数据写入到i2c设备文件描述符i2c->fd中
+    // data指向要写入的数据，size表示数据的长度
+    // 返回值是实际写入的字节数，若出错则返回-1
     return write(i2c->fd, data, size);
 }
 
