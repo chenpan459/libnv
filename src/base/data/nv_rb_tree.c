@@ -1,55 +1,85 @@
 #include "nv_rb_tree.h"
 
 // 创建新节点
+// 定义一个函数，用于创建一个新的红黑树节点
 nv_rb_Node* nv_rb_newNode(int data) {
+    // 使用malloc函数为新的节点分配内存，大小为nv_rb_Node结构体的大小
     nv_rb_Node* node = (nv_rb_Node*)malloc(sizeof(nv_rb_Node));
+    // 将传入的数据赋值给节点的data字段
     node->data = data;
+    // 将节点的颜色设置为红色，RED通常定义为1或某个宏
     node->color = RED;
+    // 初始化节点的左子节点、右子节点和父节点为NULL，表示这些指针当前没有指向任何节点
     node->left = node->right = node->parent = NULL;
+    // 返回创建的节点指针
     return node;
 }
 
 // 左旋
+// 定义一个函数，用于对红黑树进行左旋操作
+// 参数root是红黑树的根节点，参数pt是需要进行左旋操作的节点
 nv_rb_Node* nv_rb_leftRotate(nv_rb_Node* root, nv_rb_Node* pt) {
+    // 获取pt节点的右子节点
     nv_rb_Node* pt_right = pt->right;
+    // 将pt的右子节点设置为pt_right的左子节点
     pt->right = pt_right->left;
 
+    // 如果pt_right的左子节点不为空，则将其父节点设置为pt
     if (pt->right != NULL)
         pt->right->parent = pt;
 
+    // 将pt_right的父节点设置为pt的父节点
     pt_right->parent = pt->parent;
 
+    // 如果pt的父节点为空，说明pt是根节点，此时将根节点设置为pt_right
     if (pt->parent == NULL)
         root = pt_right;
+    // 如果pt是其父节点的左子节点，则将pt的父节点的左子节点设置为pt_right
     else if (pt == pt->parent->left)
         pt->parent->left = pt_right;
+    // 否则，将pt的父节点的右子节点设置为pt_right
     else
         pt->parent->right = pt_right;
 
+    // 将pt_right的左子节点设置为pt
     pt_right->left = pt;
+    // 将pt的父节点设置为pt_right
     pt->parent = pt_right;
+    // 返回新的根节点
     return root;
 }
 
 // 右旋
+// 定义一个函数，用于对红黑树进行右旋操作
+// 参数root是红黑树的根节点，pt是需要进行右旋的节点
 nv_rb_Node* nv_rb_rightRotate(nv_rb_Node* root, nv_rb_Node* pt) {
+    // 获取pt节点的左子节点
     nv_rb_Node* pt_left = pt->left;
+    // 将pt的左子节点设置为pt_left的右子节点
     pt->left = pt_left->right;
 
+    // 如果pt_left的右子节点不为空，将其父节点设置为pt
     if (pt->left != NULL)
         pt->left->parent = pt;
 
+    // 将pt_left的父节点设置为pt的父节点
     pt_left->parent = pt->parent;
 
+    // 如果pt的父节点为空，说明pt是根节点，将根节点设置为pt_left
     if (pt->parent == NULL)
         root = pt_left;
+    // 如果pt是其父节点的左子节点，将pt的父节点的左子节点设置为pt_left
     else if (pt == pt->parent->left)
         pt->parent->left = pt_left;
+    // 否则，将pt的父节点的右子节点设置为pt_left
     else
         pt->parent->right = pt_left;
 
+    // 将pt_left的右子节点设置为pt
     pt_left->right = pt;
+    // 将pt的父节点设置为pt_left
     pt->parent = pt_left;
+    // 返回新的根节点
     return root;
 }
 

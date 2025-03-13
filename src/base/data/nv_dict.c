@@ -123,27 +123,40 @@ bool nv_dict_is_empty(nv_dict_t* dict) {
     return true;
 }
 
+// 定义一个名为nv_dict_main的函数，用于演示字典的使用
 int nv_dict_main() {
+    // 初始化一个字典，返回字典的指针
     nv_dict_t* dict = nv_dict_init();
 
+    // 向字典中插入键值对，键为"key1"，值为"value1"
     nv_dict_insert(dict, "key1", "value1");
+    // 向字典中插入键值对，键为"key2"，值为"value2"
     nv_dict_insert(dict, "key2", "value2");
 
+    // 查找键为"key1"的值，并将结果存储在value指针中
     char* value = (char*)nv_dict_lookup(dict, "key1");
+    // 如果找到了值，打印"Found: "和找到的值
     if (value) {
         printf("Found: %s\n", value);
     } else {
+        // 如果没有找到值，打印"Not found"
         printf("Not found\n");
     }
 
+    // 从字典中移除键为"key1"的键值对
     nv_dict_remove(dict, "key1");
+    // 再次查找键为"key1"的值
     value = (char*)nv_dict_lookup(dict, "key1");
+    // 如果找到了值，打印"Found: "和找到的值
     if (value) {
         printf("Found: %s\n", value);
     } else {
+        // 如果没有找到值，打印"Not found"
         printf("Not found\n");
     }
 
+    // 销毁字典，释放相关资源
     nv_dict_destroy(dict);
+    // 返回0，表示程序正常结束
     return 0;
 }
