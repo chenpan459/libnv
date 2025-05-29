@@ -85,3 +85,15 @@ void nv_log_close(void) {
     }
     pthread_mutex_unlock(&g_nv_log_mutex);
 }
+
+
+
+
+void printf_hex(const uint8_t *data, size_t len) 
+{
+    for (size_t i = 0; i < len; ++i) {
+        printf("0x%02X ", data[i]);
+        if ((i + 1) % 16 == 0) printf("\n");
+    }
+    if (len % 16 != 0) printf("\n");
+}

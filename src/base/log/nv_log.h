@@ -35,6 +35,8 @@ void nv_log_write( const char *format, ...);
 // 关闭日志文件
 void nv_log_close(void);
 
+void printf_hex(const uint8_t *data, size_t len);
+
 extern char log_prex[];
 #define HEADER_FORMAT   "%-30s ] : "
 #define nv_log_printf(level, file, line, format, args...) \
