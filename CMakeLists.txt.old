@@ -1,0 +1,32 @@
+cmake_minimum_required(VERSION 3.10)
+project(libnv VERSION 1.0 LANGUAGES C)
+
+set(CMAKE_C_STANDARD 99)
+set(CMAKE_C_STANDARD_REQUIRED True)
+
+# 搜索所有源文件和头文件
+file(GLOB_RECURSE HEADER_FILES "${PROJECT_SOURCE_DIR}/src/*.h")
+file(GLOB_RECURSE SOURCES "${PROJECT_SOURCE_DIR}/src/*.c")
+
+# 创建动态库 target
+add_library(nv SHARED ${SOURCES} ${HEADER_FILES})
+
+# 自动提取头文件目录
+set(INCLUDE_DIRS "")
+foreach(header ${HEADER_FILES})
+    get_filename_component(dir ${header} DIRECTORY)
+    list(APPEND INCLUDE_DIRS ${dir})
+endforeach()
+list(REMOVE_DUPLICATES INCLUDE_DIRS)
+
+# 添加 include 路径
+target_include_directories(nv PRIVATE ${INCLUDE_DIRS})
+
+# 添加定义
+add_definitions(-D_GNU_SOURCE)
+
+# 添加可执行文件（示例）
+add_executable(arp_aging_message ${PROJECT_SOURCE_DIR}/test/arp/arp_aging_message.c)
+
+# 链接动态库到可执行文件
+target_link_libraries(arp_aging_message nv)
