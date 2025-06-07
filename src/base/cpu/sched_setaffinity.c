@@ -13,6 +13,8 @@
 #include <stdlib.h>
 #include <sched.h>
 #include <unistd.h>
+#include <sys/types.h>
+
 
 void bind_process_to_cpu(int cpu) {
     cpu_set_t mask;
@@ -24,16 +26,3 @@ void bind_process_to_cpu(int cpu) {
         exit(EXIT_FAILURE);
     }
 }
-/*
-int main() {
-    int cpu = 0; // 绑定到 CPU 0
-    bind_process_to_cpu(cpu);
-
-    // 进程的主要逻辑
-    while (1) {
-        // 执行任务
-        sleep(1);
-    }
-
-    return 0;
-}*/

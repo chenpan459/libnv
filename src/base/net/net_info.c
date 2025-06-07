@@ -5,6 +5,9 @@
 #include <netinet/in.h>
 #include <arpa/inet.h>
 #include <sys/socket.h>
+#include <sys/ioctl.h>   // struct ifconf 和 ioctl 定义
+#include <net/if.h>      // struct ifreq, ifconf 等网络接口结构
+#include <unistd.h>
 
 
 

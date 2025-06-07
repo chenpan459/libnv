@@ -35,6 +35,8 @@ set_target_properties(nv PROPERTIES LINKER_LANGUAGE C)
 add_definitions(-DENABLE_FEATURE)
 # 或者使用 target_compile_definitions
 # target_compile_definitions(nv PRIVATE ENABLE_FEATURE)
+add_definitions(-D_GNU_SOURCE)
+
 ##############################################################
 
 ###################### 定义选项开关##########################

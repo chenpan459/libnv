@@ -6,7 +6,7 @@
 #ifdef __cplusplus
 extern "C" {
 #endif
-
+#include  <nv_config.h>
 unsigned char int_to_bcd(int value) ;
 // 将字符串转换为 float 类型
 float str_to_float(const char *str);

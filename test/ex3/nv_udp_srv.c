@@ -64,11 +64,11 @@ int main() {
 
       
         len = nv_udp_read(&udp,buff,1024);
-        nv_assert_pointer(len>0,len);
+        nv_assert(len>0,len);
         nv_log_debug("recv:%s\n",buff);
         nv_memset(buff,0,1024);
         len = nv_udp_sendto(&udp,"hello",5,&udp.src_addr);
-        nv_assert_pointer(len>0,len);
+        nv_assert(len>0,len);
         nv_sleep(1);
  
     }

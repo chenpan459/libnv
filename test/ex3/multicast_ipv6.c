@@ -45,7 +45,7 @@ int main() {
 
     // 接收组播数据
     char buffer[1024];
-    struct sockaddr_in src_addr;
+    struct sockaddr_in6 src_addr;
     ssize_t bytes_received = nv_udp_socket_recvfrom_ipv6(udp_sockfd, buffer, sizeof(buffer), &src_addr);
     if (bytes_received > 0) {
         buffer[bytes_received] = '\0';

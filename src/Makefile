@@ -6,7 +6,7 @@ INCLUDE_DIRS = $(shell find . -type f -name '*.h' -exec dirname {} \; | sort -u)
 
 CFLAGS = -Wall $(foreach dir, $(INCLUDE_DIRS), -I$(dir))
 
-
+CFLAGS += -D_GNU_SOURCE
 
 # 定义链接选项
 LDFLAGS = -pthread -lrt -ldl

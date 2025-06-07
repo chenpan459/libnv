@@ -10,6 +10,8 @@ extern "C" {
 #include <sys/socket.h>
 #include <netinet/tcp.h>
 #include <netinet/in.h>
+#include <net/if.h>   // for if_nametoindex()
+
 
 //setsockopt 函数用于设置套接字选项，这些选项可以控制套接字的行为。以下是一些常用的套接字选项：
 #define  NV_SO_REUSEADDR    SO_REUSEADDR // 允许套接字绑定到一个已经被使用（在TIME_WAIT状态）的本地地址。

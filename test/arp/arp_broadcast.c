@@ -9,6 +9,7 @@
 #include <sys/types.h>
 #include <netinet/if_ether.h>
 #include <net/ethernet.h>
+#include <netpacket/packet.h>  // for struct sockaddr_ll
 
 #define INTERFACE "ens37"
 #define SRC_IP "192.168.1.100"
