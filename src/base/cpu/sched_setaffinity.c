@@ -9,6 +9,24 @@
 在 Linux 系统中，可以使用 sched_setaffinity 系统调用来绑定进程到特定的 CPU 核。以下是一个简单的示例代码：
 ****/
 
+
+/**
+ * 
+ * 
+项目	sched_setaffinity	       cpuset_setaffinity	      SetProcessAffinityMask
+平台	       Linux	            Linux (特定系统/框架)	       Windows
+控制对象	进程/线程	               进程/线程/容器资源限制	          进程
+掩码类型	cpu_set_t	              通常基于 cpuset 文件系统	    位掩码（DWORD_PTR）
+使用场景	线程/进程绑核，高性能调度	嵌入式/容器 CPU 资源控制	   Windows 应用绑核
+控制粒度	线程/进程	               系统定制，可能支持容器级	       进程
+是否标准	是（glibc/内核）	       否，依赖具体实现	              是（Win32 API）
+✅ 推荐使用建议：
+使用平台	                建议接口
+Linux	                 使用 sched_setaffinity() 是最标准、最通用的做法
+Windows	                 使用 SetProcessAffinityMask()
+嵌入式 Linux / 特定厂商   SDK	使用 cpuset_setaffinity() 或其封装接口，需看平台支持
+
+*/
 #include <stdio.h>
 #include <stdlib.h>
 #include <sched.h>
