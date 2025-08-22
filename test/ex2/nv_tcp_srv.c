@@ -1,13 +1,8 @@
-#include <nv.h>
-#include <nv_tcp.h>
-#include <nv_log.h>
-#include <nv_version.h>
 #include <nv_socket.h>
 #include <nv_string.h>
 #include <nv_mem.h>
 #include <nv_sys.h>
 #include <nv_thread.h>
-
 
 /*************************************
  * 
@@ -37,7 +32,7 @@
 
 *********************/
 void *client_thread(void *arg){
-    nv_tcp_t *client = (nv_tcp_t*)arg;
+    struct nv_tcp_s *client = (struct nv_tcp_s*)arg;
     char buff[1024];
     int len=0;
     nv_log_debug("client_thread enter\n");
@@ -60,14 +55,12 @@ void *client_thread(void *arg){
     return NULL;
 }
 
-
-
 int main() {
    
-    nv_loop_t loop;
-    nv_tcp_t  tcp;
+    struct nv_loop_s loop;
+    struct nv_tcp_s  tcp;
     nv_int32  ret;
-    nv_tcp_t *client;
+    struct nv_tcp_s *client;
  
     nv_log_debug("compile_version: %s\n",hv_compile_version());
     
