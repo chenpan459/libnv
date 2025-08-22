@@ -11,21 +11,25 @@ extern "C" {
 #include <fcntl.h>
 #include <sys/stat.h>
 #include <unistd.h>
-
-#define FIFO_NAME "./my_fifo"
+#include <poll.h>
 
 typedef struct {
     int fd;
 } fifo_t;
 
-fifo_t* nv_fifo_create(const char* name) ;
-fifo_t* nv_fifo_open(fifo_t* fifo, const char* name, int mode, int nonblock) ;
-ssize_t nv_fifo_write(fifo_t* fifo, const void* buf, size_t count) ;
-ssize_t nv_fifo_read(fifo_t* fifo, void* buf, size_t count) ;
-void nv_fifo_close(fifo_t* fifo) ;
-void nv_fifo_unlink(const char* name) ;
+fifo_t* nv_fifo_create(const char* name);
+fifo_t* nv_fifo_open(fifo_t* fifo, const char* name, int mode, int nonblock);
+ssize_t nv_fifo_write(fifo_t* fifo, const void* buf, size_t count);
+ssize_t nv_fifo_read(fifo_t* fifo, void* buf, size_t count);
 
-int nv_fifo_main() ;
+/* 新增：带超时的读写（毫秒；<0表示阻塞） */
+ssize_t nv_fifo_write_timeout(fifo_t* fifo, const void* buf, size_t count, int timeout_ms);
+ssize_t nv_fifo_read_timeout(fifo_t* fifo, void* buf, size_t count, int timeout_ms);
+
+void nv_fifo_close(fifo_t* fifo);
+void nv_fifo_unlink(const char* name);
+
+int nv_fifo_main();
 
 #ifdef __cplusplus
 }
