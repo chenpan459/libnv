@@ -47,6 +47,20 @@ typedef struct nv_telnet_sess_s {
 
 static nv_telnet_sess_t *g_telnet_sessions;
 
+static void nv_telnet_str_copy(char *dst, size_t dst_size, const char *src)
+{
+    int max_copy;
+
+    if (!dst || dst_size == 0) {
+        return;
+    }
+    max_copy = (int)dst_size - 1;
+    if (max_copy < 0) {
+        return;
+    }
+    snprintf(dst, dst_size, "%.*s", max_copy, src ? src : "");
+}
+
 /* Telnet 选项协商：WILL SGA/ECHO, DO ECHO, WONT LINEMODE */
 static const unsigned char g_telnet_init[] = {
     255, 251, 3,
@@ -158,8 +172,7 @@ static void nv_telnet_history_add(nv_telnet_sess_t *sess, const char *line)
         n = NV_TELNET_HISTORY_MAX - 1;
     }
 
-    strncpy(sess->history[n], line, NV_TELNET_LINE_MAX - 1);
-    sess->history[n][NV_TELNET_LINE_MAX - 1] = '\0';
+    nv_telnet_str_copy(sess->history[n], NV_TELNET_LINE_MAX, line);
     sess->history_pos = -1;
 }
 
@@ -170,8 +183,7 @@ static void nv_telnet_history_up(nv_telnet_sess_t *sess)
     }
 
     if (sess->history_pos < 0) {
-        strncpy(sess->history_draft, sess->line, NV_TELNET_LINE_MAX - 1);
-        sess->history_draft[NV_TELNET_LINE_MAX - 1] = '\0';
+        nv_telnet_str_copy(sess->history_draft, NV_TELNET_LINE_MAX, sess->line);
         sess->history_pos = sess->history_count - 1;
     } else if (sess->history_pos > 0) {
         sess->history_pos--;
@@ -179,8 +191,7 @@ static void nv_telnet_history_up(nv_telnet_sess_t *sess)
         return;
     }
 
-    strncpy(sess->line, sess->history[sess->history_pos], NV_TELNET_LINE_MAX - 1);
-    sess->line[NV_TELNET_LINE_MAX - 1] = '\0';
+    nv_telnet_str_copy(sess->line, NV_TELNET_LINE_MAX, sess->history[sess->history_pos]);
     sess->line_len = strlen(sess->line);
     nv_telnet_redraw_line(sess);
 }
@@ -193,12 +204,10 @@ static void nv_telnet_history_down(nv_telnet_sess_t *sess)
 
     if (sess->history_pos >= sess->history_count - 1) {
         sess->history_pos = -1;
-        strncpy(sess->line, sess->history_draft, NV_TELNET_LINE_MAX - 1);
-        sess->line[NV_TELNET_LINE_MAX - 1] = '\0';
+        nv_telnet_str_copy(sess->line, NV_TELNET_LINE_MAX, sess->history_draft);
     } else {
         sess->history_pos++;
-        strncpy(sess->line, sess->history[sess->history_pos], NV_TELNET_LINE_MAX - 1);
-        sess->line[NV_TELNET_LINE_MAX - 1] = '\0';
+        nv_telnet_str_copy(sess->line, NV_TELNET_LINE_MAX, sess->history[sess->history_pos]);
     }
 
     sess->line_len = strlen(sess->line);
@@ -243,8 +252,7 @@ static void nv_telnet_process_line(nv_telnet_sess_t *sess)
 
     switch (sess->state) {
     case NV_TELNET_ST_USER:
-        strncpy(sess->user, sess->line, sizeof(sess->user) - 1);
-        sess->user[sizeof(sess->user) - 1] = '\0';
+        nv_telnet_str_copy(sess->user, sizeof(sess->user), sess->line);
         sess->line_len = 0;
         nv_telnet_send_login_pass(sess);
         break;
