@@ -187,8 +187,11 @@ static int nv_cli_cmd_status(nv_core_ctx_t *ctx, int fd, int argc, char **argv)
     (void)argc;
     (void)argv;
 
+    nv_log_queue_stats_t lqs;
+
     nv_core_get_runtime_stats(ctx, &st);
     nv_loop_get_stats(&ctx->loop, &ls);
+    nv_log_get_queue_stats(&lqs);
 
     nv_core_cli_write(fd,
         "phase:       %s\r\n"
@@ -203,7 +206,10 @@ static int nv_cli_cmd_status(nv_core_ctx_t *ctx, int fd, int argc, char **argv)
         "loop_timers: %lu\r\n"
         "loop_idle:   %lu\r\n"
         "log_level:   %d\r\n"
-        "daemon:      %d\r\n",
+        "daemon:      %d\r\n"
+        "log_queue:   %zu/%zu pending\r\n"
+        "log_dropped: %llu\r\n"
+        "log_overflow:%s\r\n",
         nv_core_phase_name(ctx->phase),
         (int)getpid(),
         ctx->worker_id,
@@ -216,7 +222,11 @@ static int nv_cli_cmd_status(nv_core_ctx_t *ctx, int fd, int argc, char **argv)
         st.loop_timers,
         st.loop_idle,
         ctx->opts.log_level,
-        ctx->opts.daemon);
+        ctx->opts.daemon,
+        lqs.pending,
+        lqs.capacity,
+        (unsigned long long)lqs.dropped,
+        lqs.overflow ? lqs.overflow : "drop");
     return NV_OK;
 }
 

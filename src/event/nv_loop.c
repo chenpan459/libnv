@@ -43,6 +43,8 @@ int nv_loop_init(nv_loop_t *loop, const nv_loop_config_t *config) {
     
     /* 清零循环结构 */
     memset(loop, 0, sizeof(nv_loop_t));
+    loop->wakeup_pipe[0] = -1;
+    loop->wakeup_pipe[1] = -1;
     
     /* 设置基本属性 */
     loop->max_events = config->max_events;
@@ -83,6 +85,25 @@ int nv_loop_init(nv_loop_t *loop, const nv_loop_config_t *config) {
     
     /* 初始化统计信息 */
     memset(&loop->stats, 0, sizeof(loop->stats));
+
+    if (pipe(loop->wakeup_pipe) == 0) {
+        struct epoll_event ev;
+
+        fcntl(loop->wakeup_pipe[0], F_SETFL, O_NONBLOCK);
+        fcntl(loop->wakeup_pipe[1], F_SETFL, O_NONBLOCK);
+        memset(&ev, 0, sizeof(ev));
+        ev.events = EPOLLIN;
+        ev.data.ptr = NULL;
+        if (epoll_ctl(loop->epoll_fd, EPOLL_CTL_ADD,
+                      loop->wakeup_pipe[0], &ev) == 0) {
+            loop->wakeup_inited = 1;
+        } else {
+            close(loop->wakeup_pipe[0]);
+            close(loop->wakeup_pipe[1]);
+            loop->wakeup_pipe[0] = -1;
+            loop->wakeup_pipe[1] = -1;
+        }
+    }
     
     loop->state = NV_LOOP_INIT;
     return 0;
@@ -113,6 +134,19 @@ int nv_loop_cleanup(nv_loop_t *loop) {
     }
     
     nv_loop_detach_signalfd(loop);
+
+    if (loop->wakeup_inited && loop->epoll_fd >= 0) {
+        epoll_ctl(loop->epoll_fd, EPOLL_CTL_DEL, loop->wakeup_pipe[0], NULL);
+    }
+    if (loop->wakeup_pipe[0] >= 0) {
+        close(loop->wakeup_pipe[0]);
+        loop->wakeup_pipe[0] = -1;
+    }
+    if (loop->wakeup_pipe[1] >= 0) {
+        close(loop->wakeup_pipe[1]);
+        loop->wakeup_pipe[1] = -1;
+    }
+    loop->wakeup_inited = 0;
 
     /* 清理信号事件 */
     if (loop->signals.signal_events) {
@@ -210,35 +244,17 @@ int nv_loop_stop(nv_loop_t *loop) {
 
 /* 唤醒事件循环 */
 int nv_loop_wakeup(nv_loop_t *loop) {
-    if (!loop || loop->epoll_fd == -1) return -1;
-    
-    /* 通过写入管道来唤醒epoll_wait */
-    static int wakeup_pipe[2] = {-1, -1};
-    static int wakeup_initialized = 0;
-    
-    if (!wakeup_initialized) {
-        if (pipe(wakeup_pipe) == 0) {
-            fcntl(wakeup_pipe[0], F_SETFL, O_NONBLOCK);
-            fcntl(wakeup_pipe[1], F_SETFL, O_NONBLOCK);
-            
-            /* 将读端添加到epoll */
-            struct epoll_event ev;
-            ev.events = EPOLLIN;
-            ev.data.ptr = NULL; /* 特殊标记 */
-            epoll_ctl(loop->epoll_fd, EPOLL_CTL_ADD, wakeup_pipe[0], &ev);
-            
-            wakeup_initialized = 1;
-        }
+    char    c = 'w';
+    ssize_t n;
+
+    if (!loop || !loop->wakeup_inited || loop->wakeup_pipe[1] < 0) {
+        return -1;
     }
-    
-    if (wakeup_initialized) {
-        char    c = 'w';
-        ssize_t n = write(wakeup_pipe[1], &c, 1);
-        if (n < 0 && errno != EAGAIN && errno != EINTR) {
-            return -1;
-        }
+
+    n = write(loop->wakeup_pipe[1], &c, 1);
+    if (n < 0 && errno != EAGAIN && errno != EINTR) {
+        return -1;
     }
-    
     return 0;
 }
 
@@ -416,7 +432,15 @@ static int nv_loop_process_io_events(nv_loop_t *loop) {
         struct epoll_event *epoll_ev = &loop->events[i];
         nv_event_ext_t *ev = (nv_event_ext_t *)epoll_ev->data.ptr;
         
-        if (!ev) continue; /* 唤醒管道 */
+        if (!ev) {
+            char drain[64];
+            if (loop->wakeup_inited && loop->wakeup_pipe[0] >= 0) {
+                while (read(loop->wakeup_pipe[0], drain, sizeof(drain)) > 0) {
+                    /* drain wakeup pipe */
+                }
+            }
+            continue;
+        }
         
         /* 转换epoll事件到libnv事件 */
         int revents = 0;

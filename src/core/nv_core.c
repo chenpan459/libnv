@@ -680,26 +680,31 @@ void nv_core_exception_init(void)
 
 void nv_core_exception_handler(int signum)
 {
+    /*
+     * 仅 async-signal-safe 操作：记录信号、请求退出、唤醒 epoll。
+     * 日志与资源释放在主线程 nv_core_handle_fatal() 完成。
+     */
     if (g_core_ctx) {
-        g_core_ctx->phase = NV_CORE_PHASE_EXCEPTION;
+        g_core_ctx->fatal_signum = signum;
+        g_core_ctx->quit         = 1;
+        nv_loop_stop(&g_core_ctx->loop);
     }
+}
+
+void nv_core_handle_fatal(nv_core_ctx_t *ctx)
+{
+    int signum;
+
+    if (!ctx || !ctx->fatal_signum) {
+        return;
+    }
+
+    signum = (int)ctx->fatal_signum;
+    ctx->phase = NV_CORE_PHASE_EXCEPTION;
 
     nv_log_fatal("fatal signal caught: %d (%s)", signum, strsignal(signum));
-    syslog(LOG_CRIT, "nv main fatal signal: %d", signum);
 
-    if (g_core_ctx) {
-        g_core_ctx->quit = 1;
-        nv_loop_stop(&g_core_ctx->loop);
-        nv_core_business_cleanup(g_core_ctx);
-        nv_base_cleanup();
-        nv_core_pidfile_remove(g_core_ctx);
-        nv_log_close();
-        if (g_core_ctx->opts.use_syslog) {
-            closelog();
-        }
-        g_core_ctx = NULL;
-    }
-
+    ctx->fatal_signum = 0;
     signal(signum, SIG_DFL);
     raise(signum);
 }
@@ -762,6 +767,11 @@ static void nv_core_idle_handler(nv_loop_t *loop, void *ev, void *data)
         }
     }
 
+    if (ctx->fatal_signum) {
+        nv_loop_stop(&ctx->loop);
+        return;
+    }
+
     if (g_core_hooks && g_core_hooks->on_idle) {
         g_core_hooks->on_idle(ctx);
     }
@@ -769,6 +779,8 @@ static void nv_core_idle_handler(nv_loop_t *loop, void *ev, void *data)
 
 int nv_core_run_loop(nv_core_ctx_t *ctx, const nv_core_hooks_t *hooks)
 {
+    int rc;
+
     if (!ctx) {
         return NV_ERROR;
     }
@@ -787,7 +799,13 @@ int nv_core_run_loop(nv_core_ctx_t *ctx, const nv_core_hooks_t *hooks)
         nv_log_warning("health module init partial failure");
     }
 
-    return nv_loop_run(&ctx->loop);
+    rc = nv_loop_run(&ctx->loop);
+
+    if (ctx->fatal_signum) {
+        nv_core_handle_fatal(ctx);
+        return NV_ERROR;
+    }
+    return rc;
 }
 
 void nv_core_shutdown(nv_core_ctx_t *ctx)

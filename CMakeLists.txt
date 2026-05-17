@@ -43,7 +43,8 @@ option(NV_ENABLE_USB      "Build USB module (requires libusb-1.0)" ON)
 option(NV_BUILD_STATIC    "Build static library libnv.a"           ON)
 option(NV_BUILD_APP       "Build main process daemon (nvd)"        ON)
 option(NV_BUILD_EXAMPLES  "Build examples (部分示例待修复)"        OFF)
-option(NV_BUILD_TESTS     "Build tests (部分测试待修复)"           OFF)
+option(NV_BUILD_TESTS         "Build unit tests"                    ON)
+option(NV_BUILD_TESTS_LEGACY  "Build legacy network/arp tests"      OFF)
 option(NV_ENABLE_FEATURE "Enable ENABLE_FEATURE compile define"   ON)
 
 if(NV_ENABLE_FEATURE)
@@ -72,6 +73,7 @@ endif()
 
 # 测试程序
 if(NV_BUILD_TESTS)
+    enable_testing()
     add_subdirectory(test)
 endif()
 

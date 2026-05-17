@@ -1,0 +1,36 @@
+name: CI
+
+on:
+  push:
+    branches: [main, master]
+  pull_request:
+    branches: [main, master]
+
+jobs:
+  build-test:
+    runs-on: ubuntu-24.04
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Install dependencies
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y build-essential cmake
+
+      - name: Configure
+        run: |
+          cmake -S . -B build \
+            -DNV_VERSION=1.0.0-ci \
+            -DCMAKE_BUILD_TYPE=Debug \
+            -DNV_BUILD_TESTS=ON \
+            -DNV_BUILD_TESTS_LEGACY=OFF \
+            -DNV_BUILD_EXAMPLES=OFF
+
+      - name: Build
+        run: cmake --build build -j$(nproc)
+
+      - name: Unit tests
+        run: ctest --test-dir build --output-on-failure
+
+      - name: Build nvd
+        run: test -x build/bin/nvd

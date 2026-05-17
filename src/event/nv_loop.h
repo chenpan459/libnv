@@ -84,6 +84,10 @@ typedef struct nv_loop_s {
 
     int signalfd_fd;
     nv_event_ext_t *signalfd_ev;
+
+    /* 每实例独立唤醒管道（nv_loop_stop / nv_loop_wakeup） */
+    int wakeup_pipe[2];
+    int wakeup_inited;
     
     void *private_data;
 } nv_loop_t;

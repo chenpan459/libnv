@@ -2,6 +2,7 @@
 #include "nv_core_cli.h"
 
 #include <nv_log.h>
+#include <nv_secure.h>
 
 #include <errno.h>
 #include <stdio.h>
@@ -119,7 +120,7 @@ static int nv_telnet_auth(nv_core_ctx_t *ctx, const char *user, const char *pass
     if (!user || !pass) {
         return 0;
     }
-    return (strcmp(user, eu) == 0 && strcmp(pass, ep) == 0);
+    return nv_secure_str_equal(user, eu) && nv_secure_str_equal(pass, ep);
 }
 
 static void nv_telnet_send_login_user(nv_telnet_sess_t *sess)

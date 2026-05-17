@@ -65,6 +65,15 @@ void nv_log_set_overflow_policy(nv_log_overflow_e policy);
 nv_log_overflow_e nv_log_get_overflow_policy(void);
 uint64_t nv_log_get_dropped_count(void);
 
+typedef struct nv_log_queue_stats_s {
+    size_t   capacity;
+    size_t   pending;
+    uint64_t dropped;
+    const char *overflow;   /* drop|block|overwrite */
+} nv_log_queue_stats_t;
+
+void nv_log_get_queue_stats(nv_log_queue_stats_t *stats);
+
 int  nv_log_init(void);
 int  nv_log_init_file(const char *path);
 int  nv_log_init_syslog(const char *ident);

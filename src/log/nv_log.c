@@ -216,6 +216,34 @@ uint64_t nv_log_get_dropped_count(void)
     return atomic_load_explicit(&g_dropped, memory_order_relaxed);
 }
 
+void nv_log_get_queue_stats(nv_log_queue_stats_t *stats)
+{
+    uint64_t en;
+    uint64_t de;
+
+    if (!stats) {
+        return;
+    }
+
+    memset(stats, 0, sizeof(*stats));
+    stats->dropped = atomic_load_explicit(&g_dropped, memory_order_relaxed);
+
+    if (!g_ring.capacity) {
+        stats->capacity = g_ring_capacity;
+        return;
+    }
+
+    en = atomic_load_explicit(&g_ring.enqueue_pos, memory_order_acquire);
+    de = atomic_load_explicit(&g_ring.dequeue_pos, memory_order_acquire);
+    stats->capacity = g_ring.capacity;
+    stats->pending  = (size_t)(en - de);
+    switch (g_overflow_policy) {
+    case NV_LOG_OVERFLOW_BLOCK:   stats->overflow = "block"; break;
+    case NV_LOG_OVERFLOW_OVERWRITE: stats->overflow = "overwrite"; break;
+    default:                    stats->overflow = "drop"; break;
+    }
+}
+
 static int nv_log_open_default_file(void)
 {
     time_t     now = time(NULL);

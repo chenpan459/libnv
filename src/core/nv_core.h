@@ -91,6 +91,7 @@ typedef struct nv_core_ctx_s {
     volatile sig_atomic_t quit;
     volatile sig_atomic_t reload;
     volatile sig_atomic_t restart;
+    volatile sig_atomic_t fatal_signum;  /* 致命信号号，主线程处理 */
 
     time_t           started_at;
     time_t           shutdown_started_at;
@@ -149,6 +150,7 @@ void nv_core_shutdown(nv_core_ctx_t *ctx);
 /* ---------- 5. 异常处理 ---------- */
 void nv_core_exception_init(void);
 void nv_core_exception_handler(int signum);
+void nv_core_handle_fatal(nv_core_ctx_t *ctx);
 
 /* ---------- 统一入口 ---------- */
 int  nv_core_run(nv_core_ctx_t *ctx, int argc, char **argv,
