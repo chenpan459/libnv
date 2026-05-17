@@ -130,7 +130,8 @@ void nv_core_usage(const char *prog)
     printf("  -h          show help\n");
     printf("  -v          show version\n");
     printf("\nSignals: SIGINT/SIGTERM quit, SIGHUP reload, SIGUSR1 restart\n");
-    printf("Control: echo status | socat - UNIX:%s\n", NV_CORE_DEFAULT_CTL_SOCKET);
+    printf("Control: echo status | socat - UNIX:%s  (CLI cannot stop daemon)\n",
+           NV_CORE_DEFAULT_CTL_SOCKET);
     printf("Telnet:  telnet %s %d  (default user admin)\n",
            NV_CORE_DEFAULT_TELNET_BIND, NV_CORE_DEFAULT_TELNET_PORT);
 }

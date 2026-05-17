@@ -23,7 +23,7 @@ static void nv_core_ctl_handle_client(nv_core_ctx_t *ctx, int cfd)
     }
     buf[n] = '\0';
 
-    nv_core_cli_execute_line(ctx, cfd, buf);
+    nv_core_cli_execute_line(ctx, cfd, buf, 0);
 }
 
 static void nv_core_ctl_accept_handler(nv_loop_t *loop, void *ev, void *data)

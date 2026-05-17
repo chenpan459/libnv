@@ -64,8 +64,11 @@ static int nv_cli_cmd_help(nv_core_ctx_t *ctx, int fd, int argc, char **argv)
         "  workers           worker/thread settings\r\n"
         "  config            key configuration\r\n"
         "  reload            reload config file\r\n"
-        "  quit|exit         graceful shutdown\r\n"
+        "  quit|exit         leave CLI (daemon keeps running)\r\n"
+        "  shutdown          same as quit (cannot stop nvd)\r\n"
         "  ping              connectivity test\r\n"
+        "\r\n"
+        "  Stop nvd: kill -TERM <pid>  (not via CLI)\r\n"
         "\r\n"
         "  Up/Down           command history (telnet)\r\n"
         "  Tab               command name completion\r\n");
@@ -188,12 +191,21 @@ static int nv_cli_cmd_reload(nv_core_ctx_t *ctx, int fd, int argc, char **argv)
     return NV_ERROR;
 }
 
-static int nv_cli_cmd_quit(nv_core_ctx_t *ctx, int fd, int argc, char **argv)
+static int g_cli_interactive;
+
+static int nv_cli_cmd_exit(nv_core_ctx_t *ctx, int fd, int argc, char **argv)
 {
+    (void)ctx;
     (void)argc;
     (void)argv;
-    nv_core_cli_write(fd, "OK shutting down...\r\n");
-    nv_core_request_quit(ctx);
+
+    if (g_cli_interactive) {
+        nv_core_cli_write(fd, "OK disconnected (nvd keeps running)\r\n");
+        return NV_CLI_CLOSE_SESSION;
+    }
+
+    nv_core_cli_write(fd, "OK (nvd keeps running; stop with: kill -TERM %d)\r\n",
+                      (int)getpid());
     return NV_OK;
 }
 
@@ -222,9 +234,9 @@ static const nv_cli_cmd_t g_cli_cmds[] = {
     { "workers", nv_cli_cmd_workers },
     { "config",  nv_cli_cmd_config },
     { "reload",  nv_cli_cmd_reload },
-    { "quit",    nv_cli_cmd_quit },
-    { "exit",    nv_cli_cmd_quit },
-    { "shutdown",nv_cli_cmd_quit },
+    { "quit",     nv_cli_cmd_exit },
+    { "exit",     nv_cli_cmd_exit },
+    { "shutdown", nv_cli_cmd_exit },
     { "ping",    nv_cli_cmd_ping },
     { NULL,      NULL },
 };
@@ -253,16 +265,20 @@ static int nv_cli_split_args(char *line, char **argv, int max_argv)
     return argc;
 }
 
-int nv_core_cli_execute_line(nv_core_ctx_t *ctx, int fd, const char *line)
+int nv_core_cli_execute_line(nv_core_ctx_t *ctx, int fd, const char *line,
+                             int interactive)
 {
     char  buf[NV_CORE_CLI_LINE_MAX];
     char *argv[16];
     int   argc;
     int   i;
+    int   rc;
 
     if (!ctx || fd < 0 || !line) {
         return NV_ERROR;
     }
+
+    g_cli_interactive = interactive ? 1 : 0;
 
     strncpy(buf, line, sizeof(buf) - 1);
     buf[sizeof(buf) - 1] = '\0';
@@ -286,10 +302,13 @@ int nv_core_cli_execute_line(nv_core_ctx_t *ctx, int fd, const char *line)
 
     for (i = 0; g_cli_cmds[i].name; i++) {
         if (strcasecmp(argv[0], g_cli_cmds[i].name) == 0) {
-            return g_cli_cmds[i].handler(ctx, fd, argc, argv);
+            rc = g_cli_cmds[i].handler(ctx, fd, argc, argv);
+            g_cli_interactive = 0;
+            return rc;
         }
     }
 
+    g_cli_interactive = 0;
     nv_core_cli_write(fd, "unknown command: %s (try help)\r\n", argv[0]);
     return NV_ERROR;
 }

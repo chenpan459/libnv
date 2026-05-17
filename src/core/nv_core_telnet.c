@@ -268,17 +268,25 @@ static void nv_telnet_process_line(nv_telnet_sess_t *sess)
         }
         break;
 
-    case NV_TELNET_ST_SHELL:
+    case NV_TELNET_ST_SHELL: {
+        int rc;
+
         nv_telnet_history_add(sess, sess->line);
         nv_core_cli_write(sess->fd, "\r\n");
-        nv_core_cli_execute_line(sess->ctx, sess->fd, sess->line);
+        rc = nv_core_cli_execute_line(sess->ctx, sess->fd, sess->line, 1);
         sess->line_len    = 0;
         sess->history_pos = -1;
         sess->esc_len     = 0;
+
+        if (rc == NV_CLI_CLOSE_SESSION) {
+            nv_telnet_sess_remove(sess);
+            return;
+        }
         if (!sess->ctx->quit) {
             nv_core_cli_print_prompt(sess->fd);
         }
         break;
+    }
     }
 }
 
