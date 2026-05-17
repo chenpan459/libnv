@@ -50,6 +50,7 @@ foreach(_tgt IN LISTS _nv_lib_targets)
     target_include_directories(${_tgt}
         PUBLIC
             $<BUILD_INTERFACE:${NV_INCLUDE_DIRS}>
+            $<BUILD_INTERFACE:${CMAKE_BINARY_DIR}/generated>
             $<INSTALL_INTERFACE:include>
     )
     target_compile_definitions(${_tgt} PRIVATE _GNU_SOURCE)

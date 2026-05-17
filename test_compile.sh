@@ -7,6 +7,7 @@ BUILD_DIR="${BUILD_DIR:-build-check}"
 
 echo "Configuring CMake..."
 cmake -S . -B "${BUILD_DIR}" \
+    -DNV_VERSION="${NV_VERSION:-1.0.0}" \
     -DCMAKE_BUILD_TYPE=Debug \
     -DNV_BUILD_APP=ON \
     -DNV_BUILD_EXAMPLES=OFF \

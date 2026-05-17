@@ -5,6 +5,7 @@
 
 #include "nv_main.h"
 #include "nv_event.h"
+#include "nv_version.h"
 
 #include <getopt.h>
 #include <stdio.h>
@@ -111,8 +112,8 @@ int nv_main_parse_args(nv_main_ctx_t *ctx, int argc, char **argv)
         case 'd': ctx->opts.daemon      = 1; break;
         case 'f': ctx->opts.foreground = 1; break;
         case 's': ctx->opts.use_syslog = 1; break;
-        case 'h': ctx->opts.help       = 1; return NV_OK;
-        case 'v': ctx->opts.version    = 1; return NV_OK;
+        case 'h': ctx->opts.help       = 1; break;
+        case 'v': ctx->opts.version    = 1; break;
         default:
             nv_main_usage(ctx->opts.prog_name);
             return NV_ERROR;
@@ -124,7 +125,8 @@ int nv_main_parse_args(nv_main_ctx_t *ctx, int argc, char **argv)
         return NV_DECLINED;
     }
     if (ctx->opts.version) {
-        printf("libnv main process framework\n");
+        printf("libnv %s\n", nv_version_string());
+        printf("build time: %s\n", nv_build_time_string());
         return NV_DECLINED;
     }
 
@@ -136,15 +138,15 @@ int nv_main_parse_args(nv_main_ctx_t *ctx, int argc, char **argv)
 
 static int nv_main_parse_log_level(const char *v)
 {
+    nv_log_level_e level;
+
     if (!v) {
         return NV_LOG_LEVEL_INFO;
     }
-    if (strcasecmp(v, "dump") == 0)  return NV_LOG_LEVEL_DUMP;
-    if (strcasecmp(v, "debug") == 0) return NV_LOG_LEVEL_DEBUG;
-    if (strcasecmp(v, "info") == 0)  return NV_LOG_LEVEL_INFO;
-    if (strcasecmp(v, "warn") == 0)  return NV_LOG_LEVEL_WARN;
-    if (strcasecmp(v, "error") == 0) return NV_LOG_LEVEL_ERROR;
-    return atoi(v);
+    if (nv_log_level_from_string(v, &level) == 0) {
+        return (int)level;
+    }
+    return NV_LOG_LEVEL_INFO;
 }
 
 int nv_main_load_config(nv_main_ctx_t *ctx)
@@ -366,7 +368,10 @@ int nv_main_startup_init(nv_main_ctx_t *ctx)
         return NV_ERROR;
     }
 
-    nv_log_info("main process startup [%s]", nv_main_phase_name(ctx->phase));
+    nv_log_set_module("MAIN");
+    nv_log_notice("libnv %s, build time %s",
+                  nv_version_string(), nv_build_time_string());
+    nv_log_info("系统初始化完成 [%s]", nv_main_phase_name(ctx->phase));
 
     if (nv_main_pidfile_create(ctx) != NV_OK) {
         return NV_ERROR;
@@ -464,7 +469,7 @@ void nv_main_exception_handler(int signum)
         g_main_ctx->phase = NV_MAIN_PHASE_EXCEPTION;
     }
 
-    nv_log_error("fatal signal caught: %d (%s)", signum, strsignal(signum));
+    nv_log_fatal("fatal signal caught: %d (%s)", signum, strsignal(signum));
     syslog(LOG_CRIT, "nv main fatal signal: %d", signum);
 
     if (g_main_ctx) {

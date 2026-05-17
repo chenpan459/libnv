@@ -1,0 +1,7 @@
+#ifndef _NV_BUILD_INFO_H_INCLUDED_
+#define _NV_BUILD_INFO_H_INCLUDED_
+
+#define NV_VERSION_STRING "@NV_VERSION@"
+#define NV_BUILD_TIME     "@NV_BUILD_TIME@"
+
+#endif

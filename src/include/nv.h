@@ -99,31 +99,20 @@ void* nv_calloc(size_t nmemb, size_t size);
 void* nv_realloc(void *ptr, size_t size);
 void nv_free(void *ptr);
 
-/* 日志函数 */
-void nv_log_set_level(int level);
-void nv_log_write(int level, const char *file, int line, const char *func, 
-                  const char *format, ...);
-void nv_log_set_output(FILE *output);
+#include <nv_log.h>
 
-/* 日志级别定义 */
-#define NV_LOG_EMERG   0   /* 系统不可用 */
-#define NV_LOG_ALERT   1   /* 必须立即采取行动 */
-#define NV_LOG_CRIT    2   /* 严重情况 */
-#define NV_LOG_ERR     3   /* 错误情况 */
-#define NV_LOG_WARN    4   /* 警告情况 */
-#define NV_LOG_NOTICE  5   /* 正常但重要的情况 */
-#define NV_LOG_INFO    6   /* 信息性消息 */
-#define NV_LOG_DEBUG   7   /* 调试级别消息 */
-
-/* 日志宏定义 */
-#define nv_log_emerg(...)   nv_log_write(NV_LOG_EMERG, __FILE__, __LINE__, __func__, __VA_ARGS__)
-#define nv_log_alert(...)   nv_log_write(NV_LOG_ALERT, __FILE__, __LINE__, __func__, __VA_ARGS__)
-#define nv_log_crit(...)    nv_log_write(NV_LOG_CRIT, __FILE__, __LINE__, __func__, __VA_ARGS__)
-#define nv_log_error(...)   nv_log_write(NV_LOG_ERR, __FILE__, __LINE__, __func__, __VA_ARGS__)
-#define nv_log_warn(...)    nv_log_write(NV_LOG_WARN, __FILE__, __LINE__, __func__, __VA_ARGS__)
-#define nv_log_notice(...)  nv_log_write(NV_LOG_NOTICE, __FILE__, __LINE__, __func__, __VA_ARGS__)
-#define nv_log_info(...)    nv_log_write(NV_LOG_INFO, __FILE__, __LINE__, __func__, __VA_ARGS__)
-#define nv_log_debug(...)   nv_log_write(NV_LOG_DEBUG, __FILE__, __LINE__, __func__, __VA_ARGS__)
+/* 兼容旧命名（与 nv_log.h 等级一致） */
+#define NV_LOG_DEBUG    NV_LOG_LEVEL_DEBUG
+#define NV_LOG_INFO     NV_LOG_LEVEL_INFO
+#define NV_LOG_NOTICE   NV_LOG_LEVEL_NOTICE
+#define NV_LOG_WARN     NV_LOG_LEVEL_WARNING
+#define NV_LOG_WARNING  NV_LOG_LEVEL_WARNING
+#define NV_LOG_ERR      NV_LOG_LEVEL_ERROR
+#define NV_LOG_ERROR    NV_LOG_LEVEL_ERROR
+#define NV_LOG_CRIT     NV_LOG_LEVEL_CRIT
+#define NV_LOG_FATAL    NV_LOG_LEVEL_FATAL
+#define NV_LOG_ALERT    NV_LOG_LEVEL_FATAL
+#define NV_LOG_EMERG    NV_LOG_LEVEL_FATAL
 
 /* 工具函数 */
 unsigned long nv_get_tick_count(void);

@@ -6,11 +6,11 @@ linux 平台基础库,包含网络,文件,内存,日志等基础功能
 编译方法（仅 CMake）：
 
 ```bash
-# 方式一：脚本
-./build.sh
+# 方式一：脚本（必须指定版本号）
+./build.sh 1.0.0
 
 # 方式二：手动
-cmake -S . -B build -DCMAKE_BUILD_TYPE=Release
+cmake -S . -B build -DNV_VERSION=1.0.0 -DCMAKE_BUILD_TYPE=Release
 cmake --build build -j$(nproc)
 
 # 运行主进程示例

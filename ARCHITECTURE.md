@@ -267,14 +267,14 @@ typedef struct nv_udp_s {
 ### 8.1 日志系统
 
 ```c
-#define NV_LOG_EMERG   0   // 系统不可用
-#define NV_LOG_ALERT   1   // 必须立即采取行动
-#define NV_LOG_CRIT    2   // 严重情况
-#define NV_LOG_ERR     3   // 错误情况
-#define NV_LOG_WARN    4   // 警告情况
-#define NV_LOG_NOTICE  5   // 正常但重要的情况
-#define NV_LOG_INFO    6   // 信息性消息
-#define NV_LOG_DEBUG   7   // 调试级别消息
+/* nv_log_level_e：数值越小越详细，过滤阈值以下等级的日志 */
+NV_LOG_LEVEL_DEBUG   = 0   // 调试日志
+NV_LOG_LEVEL_INFO    = 1   // 正常信息
+NV_LOG_LEVEL_NOTICE  = 2   // 重要提示
+NV_LOG_LEVEL_WARNING = 3   // 警告
+NV_LOG_LEVEL_ERROR   = 4   // 错误
+NV_LOG_LEVEL_CRIT    = 5   // 严重错误
+NV_LOG_LEVEL_FATAL   = 6   // 致命错误
 ```
 
 ### 8.2 性能监控

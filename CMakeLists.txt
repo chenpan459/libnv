@@ -11,6 +11,24 @@ endif()
 
 project(libnv VERSION 1.0.0 LANGUAGES C)
 
+# 版本号（build.sh 通过 -DNV_VERSION= 传入，直接 cmake 时也建议指定）
+if(NOT DEFINED NV_VERSION OR "${NV_VERSION}" STREQUAL "")
+    message(FATAL_ERROR
+        "未指定版本号 NV_VERSION。\n"
+        "请使用: ./build.sh <版本号>\n"
+        "或:     cmake -S . -B build -DNV_VERSION=1.0.0")
+endif()
+
+string(STRIP "${NV_VERSION}" NV_VERSION)
+set(NV_BUILD_INFO_DIR "${CMAKE_BINARY_DIR}/generated")
+file(MAKE_DIRECTORY "${NV_BUILD_INFO_DIR}")
+string(TIMESTAMP NV_BUILD_TIME "%Y-%m-%d %H:%M:%S")
+configure_file(
+    "${CMAKE_SOURCE_DIR}/src/include/nv_build_info.h.in"
+    "${NV_BUILD_INFO_DIR}/nv_build_info.h"
+    @ONLY
+)
+
 set(CMAKE_C_STANDARD 99)
 set(CMAKE_C_STANDARD_REQUIRED ON)
 set(CMAKE_C_EXTENSIONS OFF)
@@ -71,7 +89,7 @@ install(DIRECTORY src/ DESTINATION ${CMAKE_INSTALL_INCLUDEDIR}/nv
 )
 
 message(STATUS "")
-message(STATUS "libnv ${PROJECT_VERSION}")
+message(STATUS "libnv ${NV_VERSION} (build @ ${NV_BUILD_TIME})")
 message(STATUS "  Build type:     ${CMAKE_BUILD_TYPE}")
 message(STATUS "  Install prefix: ${CMAKE_INSTALL_PREFIX}")
 message(STATUS "  NV_ENABLE_USB:  ${NV_ENABLE_USB}")
