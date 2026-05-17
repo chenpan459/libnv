@@ -1,6 +1,9 @@
 #include "nv_udp.h"
 #include <nv_socket.h>
 #include <nv_mem.h>
+#include <nv_log.h>
+#include <errno.h>
+#include <string.h>
 
 int nv_udp_init(struct nv_loop_s* loop, nv_udp_t* udp){
     (void)loop;
@@ -89,7 +92,7 @@ int nv_udp_server_create(nv_udp_server_t *server, struct nv_loop_s *loop, int po
     memset(server->listener, 0, sizeof(nv_udp_t));
     server->listener->socketfd = socket(AF_INET, SOCK_DGRAM, 0);
     if (server->listener->socketfd == -1) {
-        perror("NV: UDP socket creation failed");
+        nv_log_error("udp socket creation failed: %s", strerror(errno));
         free(server->listener);
         return -1;
     }
@@ -106,7 +109,7 @@ int nv_udp_server_create(nv_udp_server_t *server, struct nv_loop_s *loop, int po
     addr.sin_port = htons(port);
     
     if (bind(server->listener->socketfd, (struct sockaddr*)&addr, sizeof(addr)) == -1) {
-        perror("NV: UDP bind failed");
+        nv_log_error("udp bind failed: %s", strerror(errno));
         close(server->listener->socketfd);
         free(server->listener);
         return -1;
@@ -182,7 +185,7 @@ int nv_udp_client_connect(nv_udp_client_t *client, const char *ip, int port) {
     memset(client->connection, 0, sizeof(nv_udp_t));
     client->connection->socketfd = socket(AF_INET, SOCK_DGRAM, 0);
     if (client->connection->socketfd == -1) {
-        perror("NV: UDP socket creation failed");
+        nv_log_error("udp socket creation failed: %s", strerror(errno));
         free(client->connection);
         return -1;
     }
@@ -193,7 +196,7 @@ int nv_udp_client_connect(nv_udp_client_t *client, const char *ip, int port) {
     client->connection->dest_addr.sin_port = htons(port);
     
     if (inet_pton(AF_INET, ip, &client->connection->dest_addr.sin_addr) <= 0) {
-        perror("NV: invalid IP address");
+        nv_log_error("udp invalid IP address: %s", ip);
         close(client->connection->socketfd);
         free(client->connection);
         return -1;

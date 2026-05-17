@@ -26,11 +26,3 @@ unsigned long nv_hash_string(const char *str) {
     return nv_hash_djb2(str);
 }
 
-
-
-// int main() {
-//     const char *test_str = "Hello, World!";
-//     unsigned long hash_value = nv_hash_string(test_str);
-//     printf("The hash value of \"%s\" is %lu\n", test_str, hash_value);
-//     return 0;
-// }

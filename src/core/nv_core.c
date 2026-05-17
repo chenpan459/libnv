@@ -4,6 +4,7 @@
  ***********************************************/
 
 #include "nv_core.h"
+#include "nv_core_cli.h"
 #include "nv_core_health.h"
 #include "nv_core_config.h"
 #include "nv_core_ctl.h"
@@ -246,6 +247,20 @@ int nv_core_load_config(nv_core_ctx_t *ctx)
 
     if (nv_ini_has_key(ini, "log", "console")) {
         nv_log_set_console(nv_ini_get_bool(ini, "log", "console", nv_log_get_console()));
+    }
+
+    if (nv_ini_has_key(ini, "log", "queue_size")) {
+        nv_log_set_queue_size(
+            (size_t)nv_ini_get_int(ini, "log", "queue_size",
+                                   (int)nv_log_get_queue_size()));
+    }
+
+    str = nv_ini_get_string(ini, "log", "overflow", NULL);
+    if (str) {
+        nv_log_overflow_e pol;
+        if (nv_log_overflow_from_string(str, &pol) == 0) {
+            nv_log_set_overflow_policy(pol);
+        }
     }
 
     if (nv_ini_has_key(ini, "worker", "threads")) {
@@ -612,6 +627,8 @@ int nv_core_business_init(nv_core_ctx_t *ctx)
         return NV_ERROR;
     }
 
+    nv_core_cli_init();
+
     if (!ctx->is_master &&
         (ctx->opts.worker_processes <= 1 || ctx->worker_id == 1)) {
         if (nv_core_ctl_init(ctx) != NV_OK) {
@@ -636,6 +653,7 @@ void nv_core_business_cleanup(nv_core_ctx_t *ctx)
     nv_core_health_cleanup(ctx);
     nv_core_telnet_cleanup(ctx);
     nv_core_ctl_cleanup(ctx);
+    nv_core_cli_cleanup();
     nv_core_modules_cleanup(ctx);
     nv_signal_shutdown();
 

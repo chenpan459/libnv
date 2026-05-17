@@ -12,6 +12,18 @@
 #include <unistd.h>
 #include <ctype.h>
 
+typedef struct nv_cli_cmd_node_s {
+    char                        name[NV_CORE_CLI_NAME_MAX];
+    char                        help[NV_CORE_CLI_HELP_MAX];
+    nv_core_cli_handler_t       handler;
+    void                       *userdata;
+    struct nv_cli_cmd_node_s   *next;
+} nv_cli_cmd_node_t;
+
+static nv_cli_cmd_node_t *g_cli_cmds;
+static int                g_cli_interactive;
+static int                g_cli_inited;
+
 int nv_core_cli_write(int fd, const char *fmt, ...)
 {
     char    buf[NV_CORE_CLI_OUT_MAX];
@@ -50,23 +62,115 @@ void nv_core_cli_print_prompt(int fd)
     nv_core_cli_write(fd, "nv> ");
 }
 
+static nv_cli_cmd_node_t *nv_cli_find(const char *name)
+{
+    nv_cli_cmd_node_t *n;
+
+    if (!name) {
+        return NULL;
+    }
+    for (n = g_cli_cmds; n; n = n->next) {
+        if (strcasecmp(n->name, name) == 0) {
+            return n;
+        }
+    }
+    return NULL;
+}
+
+static int nv_cli_add_node(const char *name, const char *help,
+                           nv_core_cli_handler_t handler, void *userdata)
+{
+    nv_cli_cmd_node_t *node;
+
+    if (!name || !name[0] || !handler) {
+        return NV_ERROR;
+    }
+    if (nv_cli_find(name)) {
+        return NV_ERROR;
+    }
+
+    node = calloc(1, sizeof(*node));
+    if (!node) {
+        return NV_ERROR;
+    }
+
+    strncpy(node->name, name, sizeof(node->name) - 1);
+    if (help) {
+        strncpy(node->help, help, sizeof(node->help) - 1);
+    }
+    node->handler  = handler;
+    node->userdata = userdata;
+    node->next     = g_cli_cmds;
+    g_cli_cmds     = node;
+    return NV_OK;
+}
+
+void nv_core_cli_cleanup(void)
+{
+    nv_cli_cmd_node_t *n;
+    nv_cli_cmd_node_t *next;
+
+    for (n = g_cli_cmds; n; n = next) {
+        next = n->next;
+        free(n);
+    }
+    g_cli_cmds   = NULL;
+    g_cli_inited = 0;
+}
+
+int nv_core_cli_register(const nv_core_cli_cmd_def_t *cmd)
+{
+    if (!cmd || !cmd->name || !cmd->handler) {
+        return NV_ERROR;
+    }
+    if (!g_cli_inited) {
+        nv_core_cli_init();
+    }
+    return nv_cli_add_node(cmd->name, cmd->help, cmd->handler, cmd->userdata);
+}
+
+int nv_core_cli_unregister(const char *name)
+{
+    nv_cli_cmd_node_t *n;
+    nv_cli_cmd_node_t *prev;
+
+    if (!name) {
+        return NV_ERROR;
+    }
+
+    prev = NULL;
+    for (n = g_cli_cmds; n; prev = n, n = n->next) {
+        if (strcasecmp(n->name, name) != 0) {
+            continue;
+        }
+        if (prev) {
+            prev->next = n->next;
+        } else {
+            g_cli_cmds = n->next;
+        }
+        free(n);
+        return NV_OK;
+    }
+    return NV_ERROR;
+}
+
 static int nv_cli_cmd_help(nv_core_ctx_t *ctx, int fd, int argc, char **argv)
 {
+    nv_cli_cmd_node_t *n;
+
     (void)ctx;
     (void)argc;
     (void)argv;
+
+    nv_core_cli_write(fd, "commands:\r\n");
+    for (n = g_cli_cmds; n; n = n->next) {
+        if (n->help[0]) {
+            nv_core_cli_write(fd, "  %-16s  %s\r\n", n->name, n->help);
+        } else {
+            nv_core_cli_write(fd, "  %s\r\n", n->name);
+        }
+    }
     nv_core_cli_write(fd,
-        "commands:\r\n"
-        "  help              show this help\r\n"
-        "  status            process and loop status\r\n"
-        "  uptime            running time\r\n"
-        "  version           libnv version\r\n"
-        "  workers           worker/thread settings\r\n"
-        "  config            key configuration\r\n"
-        "  reload            reload config file\r\n"
-        "  quit|exit         leave CLI (daemon keeps running)\r\n"
-        "  shutdown          same as quit (cannot stop nvd)\r\n"
-        "  ping              connectivity test\r\n"
         "\r\n"
         "  Stop nvd: kill -TERM <pid>  (not via CLI)\r\n"
         "\r\n"
@@ -191,8 +295,6 @@ static int nv_cli_cmd_reload(nv_core_ctx_t *ctx, int fd, int argc, char **argv)
     return NV_ERROR;
 }
 
-static int g_cli_interactive;
-
 static int nv_cli_cmd_exit(nv_core_ctx_t *ctx, int fd, int argc, char **argv)
 {
     (void)ctx;
@@ -218,28 +320,48 @@ static int nv_cli_cmd_ping(nv_core_ctx_t *ctx, int fd, int argc, char **argv)
     return NV_OK;
 }
 
-typedef struct {
-    const char *name;
-    int (*handler)(nv_core_ctx_t *ctx, int fd, int argc, char **argv);
-} nv_cli_cmd_t;
+static void nv_cli_register_builtins(void)
+{
+    static const struct {
+        const char *name;
+        const char *help;
+        nv_core_cli_handler_t handler;
+    } builtins[] = {
+        { "help",     "show this help",           nv_cli_cmd_help },
+        { "?",        "show this help",           nv_cli_cmd_help },
+        { "status",   "process and loop status",  nv_cli_cmd_status },
+        { "stat",     "process and loop status",  nv_cli_cmd_status },
+        { "uptime",   "running time",             nv_cli_cmd_uptime },
+        { "version",  "libnv version",            nv_cli_cmd_version },
+        { "ver",      "libnv version",            nv_cli_cmd_version },
+        { "workers",  "worker/thread settings",   nv_cli_cmd_workers },
+        { "config",   "key configuration",        nv_cli_cmd_config },
+        { "reload",   "reload config file",       nv_cli_cmd_reload },
+        { "quit",     "leave CLI (daemon runs)",  nv_cli_cmd_exit },
+        { "exit",     "leave CLI (daemon runs)",  nv_cli_cmd_exit },
+        { "shutdown", "same as quit",             nv_cli_cmd_exit },
+        { "ping",     "connectivity test",        nv_cli_cmd_ping },
+        { NULL, NULL, NULL },
+    };
+    int i;
 
-static const nv_cli_cmd_t g_cli_cmds[] = {
-    { "help",    nv_cli_cmd_help },
-    { "?",       nv_cli_cmd_help },
-    { "status",  nv_cli_cmd_status },
-    { "stat",    nv_cli_cmd_status },
-    { "uptime",  nv_cli_cmd_uptime },
-    { "version", nv_cli_cmd_version },
-    { "ver",     nv_cli_cmd_version },
-    { "workers", nv_cli_cmd_workers },
-    { "config",  nv_cli_cmd_config },
-    { "reload",  nv_cli_cmd_reload },
-    { "quit",     nv_cli_cmd_exit },
-    { "exit",     nv_cli_cmd_exit },
-    { "shutdown", nv_cli_cmd_exit },
-    { "ping",    nv_cli_cmd_ping },
-    { NULL,      NULL },
-};
+    for (i = 0; builtins[i].name; i++) {
+        if (nv_cli_find(builtins[i].name)) {
+            continue;
+        }
+        nv_cli_add_node(builtins[i].name, builtins[i].help,
+                        builtins[i].handler, NULL);
+    }
+}
+
+void nv_core_cli_init(void)
+{
+    if (g_cli_inited) {
+        return;
+    }
+    g_cli_inited = 1;
+    nv_cli_register_builtins();
+}
 
 static int nv_cli_split_args(char *line, char **argv, int max_argv)
 {
@@ -268,14 +390,18 @@ static int nv_cli_split_args(char *line, char **argv, int max_argv)
 int nv_core_cli_execute_line(nv_core_ctx_t *ctx, int fd, const char *line,
                              int interactive)
 {
-    char  buf[NV_CORE_CLI_LINE_MAX];
-    char *argv[16];
-    int   argc;
-    int   i;
-    int   rc;
+    char               buf[NV_CORE_CLI_LINE_MAX];
+    char              *argv[16];
+    int                argc;
+    nv_cli_cmd_node_t *cmd;
+    int                rc;
 
     if (!ctx || fd < 0 || !line) {
         return NV_ERROR;
+    }
+
+    if (!g_cli_inited) {
+        nv_core_cli_init();
     }
 
     g_cli_interactive = interactive ? 1 : 0;
@@ -283,7 +409,6 @@ int nv_core_cli_execute_line(nv_core_ctx_t *ctx, int fd, const char *line,
     strncpy(buf, line, sizeof(buf) - 1);
     buf[sizeof(buf) - 1] = '\0';
 
-    /* trim trailing CR/LF */
     {
         size_t n = strlen(buf);
         while (n > 0 && (buf[n - 1] == '\r' || buf[n - 1] == '\n')) {
@@ -300,12 +425,11 @@ int nv_core_cli_execute_line(nv_core_ctx_t *ctx, int fd, const char *line,
         return NV_OK;
     }
 
-    for (i = 0; g_cli_cmds[i].name; i++) {
-        if (strcasecmp(argv[0], g_cli_cmds[i].name) == 0) {
-            rc = g_cli_cmds[i].handler(ctx, fd, argc, argv);
-            g_cli_interactive = 0;
-            return rc;
-        }
+    cmd = nv_cli_find(argv[0]);
+    if (cmd) {
+        rc = cmd->handler(ctx, fd, argc, argv);
+        g_cli_interactive = 0;
+        return rc;
     }
 
     g_cli_interactive = 0;
@@ -378,27 +502,32 @@ static void nv_cli_build_completed_line(char *out, size_t out_size,
 
 int nv_core_cli_tab_complete(int fd, char *line, size_t line_max, size_t *line_len)
 {
-    const char *matches[32];
-    char        tail[NV_CORE_CLI_LINE_MAX];
-    char        new_line[NV_CORE_CLI_LINE_MAX];
-    char        lcp_buf[NV_CORE_CLI_LINE_MAX];
-    size_t      word_len;
-    size_t      lcp_len;
-    int         i;
-    int         nmatch = 0;
+    const char        *matches[32];
+    char               tail[NV_CORE_CLI_LINE_MAX];
+    char               new_line[NV_CORE_CLI_LINE_MAX];
+    char               lcp_buf[NV_CORE_CLI_LINE_MAX];
+    nv_cli_cmd_node_t *cmd;
+    size_t             word_len;
+    size_t             lcp_len;
+    int                nmatch = 0;
+    int                i;
 
     if (!line || !line_len || line_max < 2 || fd < 0) {
         return NV_ERROR;
     }
 
+    if (!g_cli_inited) {
+        nv_core_cli_init();
+    }
+
     line[*line_len] = '\0';
     word_len = nv_cli_first_word_len(line, *line_len);
 
-    for (i = 0; g_cli_cmds[i].name && nmatch < 32; i++) {
+    for (cmd = g_cli_cmds; cmd && nmatch < 32; cmd = cmd->next) {
         if (word_len == 0 ||
-            strncasecmp(g_cli_cmds[i].name, line, word_len) == 0) {
-            if (!nv_cli_match_exists(matches, nmatch, g_cli_cmds[i].name)) {
-                matches[nmatch++] = g_cli_cmds[i].name;
+            strncasecmp(cmd->name, line, word_len) == 0) {
+            if (!nv_cli_match_exists(matches, nmatch, cmd->name)) {
+                matches[nmatch++] = cmd->name;
             }
         }
     }

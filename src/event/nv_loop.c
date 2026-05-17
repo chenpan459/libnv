@@ -11,6 +11,7 @@
 #include "nv_loop.h"
 #include "nv_event.h"
 #include <nv_signal.h>
+#include <nv_log.h>
 #include <string.h>
 #include <errno.h>
 #include <unistd.h>
@@ -50,14 +51,14 @@ int nv_loop_init(nv_loop_t *loop, const nv_loop_config_t *config) {
     /* 创建epoll实例 */
     loop->epoll_fd = epoll_create1(EPOLL_CLOEXEC);
     if (loop->epoll_fd == -1) {
-        perror("NV: epoll_create1 failed");
+        nv_log_error("epoll_create1 failed: %s", strerror(errno));
         return -1;
     }
     
     /* 分配事件数组 */
     loop->events = (struct epoll_event *)malloc(loop->max_events * sizeof(struct epoll_event));
     if (!loop->events) {
-        perror("NV: malloc events array failed");
+        nv_log_error("malloc events array failed");
         close(loop->epoll_fd);
         return -1;
     }
@@ -172,7 +173,7 @@ int nv_loop_run(nv_loop_t *loop) {
             if (errno == EINTR) {
                 continue; /* 被信号中断，继续循环 */
             }
-            perror("NV: epoll_wait failed");
+            nv_log_error("epoll_wait failed: %s", strerror(errno));
             break;
         }
         
@@ -259,7 +260,7 @@ int nv_loop_add_event(nv_loop_t *loop, nv_event_ext_t *ev, int events) {
     epoll_ev.data.ptr = ev;
     
     if (epoll_ctl(loop->epoll_fd, EPOLL_CTL_ADD, ev->fd, &epoll_ev) == -1) {
-        perror("NV: epoll_ctl ADD failed");
+        nv_log_error("epoll_ctl ADD failed: %s", strerror(errno));
         return -1;
     }
     
@@ -292,7 +293,7 @@ int nv_loop_modify_event(nv_loop_t *loop, nv_event_ext_t *ev, int events) {
         epoll_ev.data.ptr = ev;
         
         if (epoll_ctl(loop->epoll_fd, EPOLL_CTL_MOD, ev->fd, &epoll_ev) == -1) {
-            perror("NV: epoll_ctl MOD failed");
+            nv_log_error("epoll_ctl MOD failed: %s", strerror(errno));
             return -1;
         }
     }

@@ -1,6 +1,9 @@
 #include "nv_tcp.h"
 #include <nv_socket.h>
 #include <nv_mem.h>
+#include <nv_log.h>
+#include <errno.h>
+#include <string.h>
 
 int nv_tcp_init(struct nv_loop_s* loop, nv_tcp_t* tcp){
     tcp->socketfd = nv_tcp_socket_create();
@@ -98,7 +101,7 @@ int nv_tcp_server_create(nv_tcp_server_t *server, struct nv_loop_s *loop, int po
     memset(server->listener, 0, sizeof(nv_tcp_t));
     server->listener->socketfd = socket(AF_INET, SOCK_STREAM, 0);
     if (server->listener->socketfd == -1) {
-        perror("NV: socket creation failed");
+        nv_log_error("tcp socket creation failed: %s", strerror(errno));
         free(server->listener);
         return -1;
     }
@@ -115,7 +118,7 @@ int nv_tcp_server_create(nv_tcp_server_t *server, struct nv_loop_s *loop, int po
     addr.sin_port = htons(port);
     
     if (bind(server->listener->socketfd, (struct sockaddr*)&addr, sizeof(addr)) == -1) {
-        perror("NV: bind failed");
+        nv_log_error("tcp bind failed: %s", strerror(errno));
         close(server->listener->socketfd);
         free(server->listener);
         return -1;
@@ -128,7 +131,7 @@ int nv_tcp_server_start(nv_tcp_server_t *server) {
     if (!server || !server->listener || server->listener->socketfd == -1) return -1;
     
     if (listen(server->listener->socketfd, server->backlog) == -1) {
-        perror("NV: listen failed");
+        nv_log_error("tcp listen failed: %s", strerror(errno));
         return -1;
     }
     
@@ -198,7 +201,7 @@ int nv_tcp_client_connect(nv_tcp_client_t *client, const char *ip, int port) {
     /* 创建socket */
     client->connection->socketfd = socket(AF_INET, SOCK_STREAM, 0);
     if (client->connection->socketfd == -1) {
-        perror("NV: socket creation failed");
+        nv_log_error("tcp socket creation failed: %s", strerror(errno));
         free(client->connection);
         return -1;
     }
@@ -210,14 +213,14 @@ int nv_tcp_client_connect(nv_tcp_client_t *client, const char *ip, int port) {
     addr.sin_port = htons(port);
     
     if (inet_pton(AF_INET, ip, &addr.sin_addr) <= 0) {
-        perror("NV: invalid IP address");
+        nv_log_error("tcp invalid IP address: %s", ip);
         close(client->connection->socketfd);
         free(client->connection);
         return -1;
     }
     
     if (connect(client->connection->socketfd, (struct sockaddr*)&addr, sizeof(addr)) == -1) {
-        perror("NV: connect failed");
+        nv_log_error("tcp connect failed: %s", strerror(errno));
         close(client->connection->socketfd);
         free(client->connection);
         return -1;
