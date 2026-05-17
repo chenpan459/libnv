@@ -86,34 +86,3 @@ int nv_get_file_owner(const char* filepath, char* owner, size_t owner_size, char
     snprintf(group, group_size, "%s", grp->gr_name);
     return 0;
 }
-
-int nv_permissions_main() {
-    const char* filepath = "example_file.txt";
-
-    // 设置文件权限
-    if (nv_set_file_permissions(filepath, S_IRUSR | S_IWUSR | S_IRGRP | S_IROTH) != 0) {
-        return 1;
-    }
-
-    // 获取文件权限
-    mode_t mode;
-    if (nv_get_file_permissions(filepath, &mode) != 0) {
-        return 1;
-    }
-    printf("File permissions: %o\n", mode & 0777);
-
-    // 设置文件所有者和组
-    if (nv_set_file_owner(filepath, "username", "groupname") != 0) {
-        return 1;
-    }
-
-    // 获取文件所有者和组
-    char owner[256];
-    char group[256];
-    if (nv_get_file_owner(filepath, owner, sizeof(owner), group, sizeof(group)) != 0) {
-        return 1;
-    }
-    printf("File owner: %s, group: %s\n", owner, group);
-
-    return 0;
-}

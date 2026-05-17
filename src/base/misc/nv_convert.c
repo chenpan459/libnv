@@ -37,6 +37,3 @@ void float_to_str(float value, char *str, size_t size) {
     // 使用 snprintf 将 float 转换为字符串
     snprintf(str, size, "%.6f", value); // 保留 6 位小数
 }
-
-
-

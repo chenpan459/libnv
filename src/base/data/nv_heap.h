@@ -46,11 +46,6 @@ void nv_heap_insert(nv_heap_t* heap, int value) ;
 
 // 删除堆顶元素
 int nv_heap_remove(nv_heap_t* heap) ;
-
-
-int nv_heap_main() ;
-
-    
 #ifdef __cplusplus
 }
 #endif

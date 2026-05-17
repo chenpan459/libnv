@@ -94,21 +94,3 @@ int nv_heap_remove(nv_heap_t* heap) {
     nv_heap_sift_down(heap, 0);
     return root;
 }
-
-int nv_heap_main() {
-    nv_heap_t* heap = nv_heap_init();
-
-    nv_heap_insert(heap, 10);
-    nv_heap_insert(heap, 20);
-    nv_heap_insert(heap, 5);
-    nv_heap_insert(heap, 30);
-
-    printf("Heap top: %d\n", nv_heap_peek(heap));
-
-    while (!nv_heap_is_empty(heap)) {
-        printf("Removed: %d\n", nv_heap_remove(heap));
-    }
-
-    nv_heap_destroy(heap);
-    return 0;
-}

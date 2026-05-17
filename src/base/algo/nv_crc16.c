@@ -28,7 +28,3 @@ uint16_t nv_crc16_compute(uint8_t *data, uint16_t length) {
     // 返回计算得到的CRC校验值
     return crc;
 }
-
-
-
-

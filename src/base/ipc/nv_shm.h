@@ -26,12 +26,6 @@ int nv_shm_unmap(nv_shm_t *shm_obj) ;
 int nv_shm_close(nv_shm_t *shm_obj) ;
 // 删除共享内存对象
 int nv_shm_unlink() ;
-
-
-
-int nv_shm_main() ;
-
-
 #ifdef __cplusplus
 }
 #endif

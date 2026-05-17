@@ -19,10 +19,6 @@ int nv_semaphore_close(nv_semaphore_t* sem_obj) ;
 int nv_semaphore_unlink(const char* name) ;
 int nv_semaphore_wait(nv_semaphore_t* sem_obj) ;
 int nv_semaphore_post(nv_semaphore_t* sem_obj) ;
-
-
-int nv_semaphore_main() ;
-
 #ifdef __cplusplus
 }
 #endif

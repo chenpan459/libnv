@@ -107,34 +107,3 @@ void nv_rs485_close(nv_rs485_t* rs485) {
         free(rs485);
     }
 }
-
-
-
-
-int nv_rs485_main() {
-    const char* portname = "/dev/ttyS0"; // 替换为实际的 RS-485 端口
-    nv_rs485_t* rs485 = nv_rs485_open(portname);
-    if (!rs485) {
-        return 1;
-    }
-
-    if (nv_rs485_configure(rs485, B9600, 8, 1, 'N') != 0) {
-        nv_rs485_close(rs485);
-        return 1;
-    }
-
-    const char* message = "Hello, RS-485!";
-    nv_rs485_write(rs485, message, strlen(message));
-
-    char buffer[100];
-    ssize_t n = nv_rs485_read(rs485, buffer, sizeof(buffer) - 1);
-    if (n > 0) {
-        buffer[n] = '\0';
-        printf("Read from RS-485: %s\n", buffer);
-    } else {
-        printf("No data read from RS-485\n");
-    }
-
-    nv_rs485_close(rs485);
-    return 0;
-}

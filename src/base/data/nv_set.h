@@ -34,10 +34,6 @@ void nv_set_remove(nv_set_t* set, const char* data) ;
 
 // 获取集合大小
 int nv_set_size(nv_set_t* set) ;
-
-int nv_set_main() ;
-
-
 #ifdef __cplusplus
 }
 #endif

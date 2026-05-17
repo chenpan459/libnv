@@ -27,9 +27,6 @@ nv_rb_Node* nv_rb_insertBST(nv_rb_Node* root, nv_rb_Node* pt) ;
 nv_rb_Node* nv_rb_insert(nv_rb_Node* root, int data) ;
 nv_rb_Node* nv_rb_search(nv_rb_Node* root, int data) ;
 void nv_rb_inorder(nv_rb_Node* root) ;
-
-int nv_rb_main();
-
 #ifdef __cplusplus
 }
 #endif

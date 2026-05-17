@@ -348,6 +348,7 @@ int nv_tcp_buffer_read(nv_tcp_buffer_t *buf, char *data, size_t len) {
 
 /* TCP连接池相关函数 */
 int nv_tcp_pool_create(nv_tcp_pool_t *pool, struct nv_loop_s *loop, int max_conns) {
+    (void)loop;
     if (!pool) return -1;
     
     pool->connections = malloc(max_conns * sizeof(nv_tcp_t*));

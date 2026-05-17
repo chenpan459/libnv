@@ -31,12 +31,13 @@ int get_net_linkUp_info() {
         return 1;
     }
     ifr = ifc.ifc_req;
-    int num_interfaces = ifc.ifc_len / sizeof(struct ifreq);
+    {
+        int num_interfaces = (int)(ifc.ifc_len / (int)sizeof(struct ifreq));
+        int i;
 
-    printf("num Interface: %d\n", num_interfaces);
+        printf("num Interface: %d\n", num_interfaces);
 
-
-    for (int i = 0; i < ifc.ifc_len / sizeof(struct ifreq); ++i) {
+        for (i = 0; i < num_interfaces; ++i) {
         ifr = &((struct ifreq*)buf)[i];
 
             printf("Interface: i=%d\n", i);
@@ -60,6 +61,7 @@ int get_net_linkUp_info() {
             printf("  Subnet Mask: NULL\n\n");
 
 	    }
+        }
     }
 
     close(sock);

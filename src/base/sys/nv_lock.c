@@ -26,4 +26,3 @@ int nv_mutex_trylock(nv_mutex_t *mutex) {
 int nv_mutex_unlock(nv_mutex_t *mutex) {
     return pthread_mutex_unlock(mutex);
 }
-

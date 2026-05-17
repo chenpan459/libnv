@@ -37,12 +37,6 @@ ssize_t nv_serial_write(nv_serial_t* serial, const char* data, size_t size) ;
 ssize_t nv_serial_read(nv_serial_t* serial, char* data, size_t size) ;
 // 关闭串口
 void nv_serial_close(nv_serial_t* serial) ;
-
-
-
-int nv_serial_main() ;
-
-
 #ifdef __cplusplus
 }
 #endif

@@ -81,23 +81,3 @@ void nv_mmap_close(nv_mmap_file_t* mmap_file) {
         free(mmap_file);
     }
 }
-
-int nv_mmap_main() {
-    const char* filepath = "example_file.txt";
-    size_t size = 1024;
-
-    nv_mmap_file_t* mmap_file = nv_mmap_open(filepath, size);
-    if (!mmap_file) {
-        return 1;
-    }
-
-    const char* message = "Hello, mmap!";
-    nv_mmap_write(mmap_file, 0, message, strlen(message) + 1);
-
-    char buffer[50];
-    nv_mmap_read(mmap_file, 0, buffer, sizeof(buffer));
-    printf("Read from mmap: %s\n", buffer);
-
-    nv_mmap_close(mmap_file);
-    return 0;
-}

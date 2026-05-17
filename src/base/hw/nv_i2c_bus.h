@@ -45,11 +45,6 @@ ssize_t nv_i2c_write(nv_i2c_t* i2c, const char* data, size_t size) ;
 ssize_t nv_i2c_read(nv_i2c_t* i2c, char* data, size_t size) ;
 // 关闭 I2C 设备
 void nv_i2c_close(nv_i2c_t* i2c) ;
-
-
-
-int nv_i2c_main() ;
-
 #ifdef __cplusplus
 }
 #endif

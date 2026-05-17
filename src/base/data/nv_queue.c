@@ -59,20 +59,3 @@ void* nv_queue_dequeue(nv_queue_t* queue) {
 bool nv_queue_is_empty(nv_queue_t* queue) {
     return queue->front == NULL;
 }
-
-int nv_queue_main() {
-    nv_queue_t* queue = nv_queue_init();
-
-    int data1 = 1, data2 = 2, data3 = 3;
-    nv_queue_enqueue(queue, &data1);
-    nv_queue_enqueue(queue, &data2);
-    nv_queue_enqueue(queue, &data3);
-
-    while (!nv_queue_is_empty(queue)) {
-        int* data = (int*)nv_queue_dequeue(queue);
-        printf("Dequeued: %d\n", *data);
-    }
-
-    nv_queue_destroy(queue);
-    return 0;
-}

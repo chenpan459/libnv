@@ -34,10 +34,6 @@ void nv_stack_push(nv_stack_t* stack, void* data) ;
 void* nv_stack_pop(nv_stack_t* stack) ;
 // 检查栈是否为空
 bool nv_stack_is_empty(nv_stack_t* stack) ;
-
-
-int nv_stack_main() ;
-
 #ifdef __cplusplus
 }
 #endif

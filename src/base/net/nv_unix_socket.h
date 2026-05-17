@@ -39,8 +39,6 @@ int nv_unix_socket_set_receive_buffer_size(int sockfd, int size);
 
 
 #if NV_UTIL_TEST_ON
-int  nv_unix_socket_server_main();
-int nv_unix_socket_client_main() ;
 #endif
 
 

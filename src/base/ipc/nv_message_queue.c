@@ -90,24 +90,3 @@ void nv_destroy_message_queue(message_queue_t* queue) {
     }
     free(queue);
 }
-
-int message_queue_main() {
-    message_queue_t* queue = nv_init_message_queue("/my_queue", 10, MAX_MSG_SIZE, 0);
-    if (!queue) return EXIT_FAILURE;
-
-    const char* msg = "Hello, Message Queue!";
-    if (nv_send_message(queue, msg) == -1) {
-        nv_destroy_message_queue(queue);
-        return EXIT_FAILURE;
-    }
-
-    char buffer[MAX_MSG_SIZE];
-    if (nv_receive_message(queue, buffer, sizeof(buffer)) == -1) {
-        nv_destroy_message_queue(queue);
-        return EXIT_FAILURE;
-    }
-
-    printf("Received message: %s\n", buffer);
-    nv_destroy_message_queue(queue);
-    return EXIT_SUCCESS;
-}

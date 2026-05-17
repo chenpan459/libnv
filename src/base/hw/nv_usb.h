@@ -38,13 +38,6 @@ nv_usb_t* nv_usb_open(uint16_t vendor_id, uint16_t product_id) ;
 void nv_usb_close(nv_usb_t* usb) ;
 ssize_t nv_usb_read(nv_usb_t* usb, char* data, size_t size) ;
 ssize_t nv_usb_write(nv_usb_t* usb, const char* data, size_t size) ;
-
-
-
-
-int nv_usb_main() ;
-
-
 #ifdef __cplusplus
 }
 #endif

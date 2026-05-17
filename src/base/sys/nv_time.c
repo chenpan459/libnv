@@ -2,8 +2,6 @@
 #include "nv_time.h"
 #include <nv_string.h>
 
-static const char* s_weekdays[] = {"Sunday", "Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday"};
-
 static const char* s_months[] = {"January", "February", "March", "April", "May", "June",
     "July", "August", "September", "October", "November", "December"};
 
@@ -205,22 +203,4 @@ datetime_t nv_compile_datetime() {
     sscanf(__TIME__, "%d:%d:%d", &dt.hour, &dt.min, &dt.sec);
     dt.month = month_atoi(month);
     return dt;
-}
-
-int nv_time_main(){
-
-    char buff[64]={0};
-    convert_timestamp_to_datetime("1731568786",buff,sizeof(buff));
-
-    printf("时间: %s\n", buff);
-  // 日期时间字符串
-    char datetime_str[] = "2024-1-1 10:10:10";    
-    // 调用函数将日期时间字符串转换为时间戳
-    time_t timestamp = datetime_to_timestamp(datetime_str);    
-    if (timestamp != -1) {
-        // 打印时间戳
-        printf("时间戳: %ld\n", (long)timestamp);
-    }
-    
-    return 0;
 }

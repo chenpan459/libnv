@@ -27,11 +27,6 @@ int nv_seek_file(FILE* file, long offset, int whence) ;
 
 // 获取当前文件指针位置
 long nv_tell_file(FILE* file) ;
-
-
-
-
-int nv_file_main();
 #ifdef __cplusplus
 }
 #endif

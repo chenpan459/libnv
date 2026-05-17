@@ -28,9 +28,6 @@ ssize_t nv_fifo_read_timeout(fifo_t* fifo, void* buf, size_t count, int timeout_
 
 void nv_fifo_close(fifo_t* fifo);
 void nv_fifo_unlink(const char* name);
-
-int nv_fifo_main();
-
 #ifdef __cplusplus
 }
 #endif

@@ -34,10 +34,4 @@ void nv_hash_table_insert(HashTable* table, const char* key, const char* value);
 char* nv_hash_table_find(HashTable* table, const char* key);
 void nv_hash_table_delete(HashTable* table, const char* key);
 void nv_hash_table_destroy(HashTable* table);
-
-
-
-
-int nv_hash_table_main();
-
 #endif 

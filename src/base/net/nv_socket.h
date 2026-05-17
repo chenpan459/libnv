@@ -96,14 +96,6 @@ int nv_leave_multicast_group_ipv6(int sockfd, const char *multicast_ip, const ch
 int nv_set_multicast_ttl_ipv6(int sockfd, int ttl);
 // 设置 IPv6 组播接口
 int nv_set_multicast_interface_ipv6(int sockfd, const char *interface_ip);
-
-
-
-
-
-
-
-int nv_socket_main();
 #ifdef __cplusplus
 }
 #endif

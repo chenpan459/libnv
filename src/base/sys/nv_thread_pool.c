@@ -181,25 +181,3 @@ int nv_threadpool_destroy(threadpool_t *tp, nv_tp_shutdown_mode_t mode) {
 
     return NV_TP_OK;
 }
-
-/* 示例函数保持但适配新API */
-#include <stdio.h>
-#include <unistd.h>
-static void example_task(void *arg) {
-    int num = *((int *)arg);
-    printf("Executing task %d\n", num);
-    usleep(1000 * 500);
-}
-
-int nv_thread_pool_main() {
-    threadpool_t *tp = nv_threadpool_create(4, 16);
-    int tasks[10] = {0,1,2,3,4,5,6,7,8,9};
-
-    for (int i = 0; i < 10; i++) {
-        nv_threadpool_add(tp, example_task, (void *)&tasks[i]);
-    }
-
-    nv_threadpool_wait_idle(tp);
-    nv_threadpool_destroy(tp, NV_TP_SHUTDOWN_GRACEFUL);
-    return 0;
-}

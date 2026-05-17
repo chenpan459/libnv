@@ -219,29 +219,3 @@ void nv_timer_manager_stop(nv_timer_manager_t* manager) {
     if (!manager) return;
     manager->running = 0;
 }
-
-/* 示例回调与 main 可按需保留 */
-static void my_callback(void* user_data) {
-    printf("NV: Timer expired! User data: %s\n", (char*)user_data);
-}
-
-int nv_timer_task_main() {
-    nv_timer_manager_t* manager = nv_timer_manager_init(128);
-    if (!manager) return EXIT_FAILURE;
-
-    int t1 = nv_timer_manager_create_timer(manager, 1, 0, 0, 0, my_callback, "Timer once 1s");
-    (void)t1;
-    int t2 = nv_timer_manager_create_timer(manager, 1, 0, 1, 0, my_callback, "Timer periodic 1s");
-    (void)t2;
-
-    printf("NV: Timers set, running...\n");
-
-    /* 单步处理5秒演示 */
-    for (int i = 0; i < 5; i++) {
-        nv_timer_manager_process_once(manager, 1000);
-    }
-
-    nv_timer_manager_destroy(manager);
-    return EXIT_SUCCESS;
-}
-

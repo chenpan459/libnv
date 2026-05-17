@@ -39,13 +39,6 @@ void* nv_dict_lookup(nv_dict_t* dict, const char* key) ;
 void nv_dict_remove(nv_dict_t* dict, const char* key) ;
 // 检查字典是否为空
 bool nv_dict_is_empty(nv_dict_t* dict) ;
-
-
-
-
-int nv_dict_main() ;
-
-    
 #ifdef __cplusplus
 }
 #endif

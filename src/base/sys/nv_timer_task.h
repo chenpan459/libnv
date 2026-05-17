@@ -71,8 +71,6 @@ int nv_timer_manager_run(nv_timer_manager_t* manager);
 void nv_timer_manager_stop(nv_timer_manager_t* manager);
 
 /* 示例入口（可选） */
-int nv_timer_task_main();
-
 #ifdef __cplusplus
 }
 #endif

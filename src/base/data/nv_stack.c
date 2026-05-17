@@ -68,20 +68,3 @@ bool nv_stack_is_empty(nv_stack_t* stack) {
     // 如果top为NULL，表示栈中没有元素，即栈为空
     return stack->top == NULL;
 }
-
-int nv_stack_main() {
-    nv_stack_t* stack = nv_stack_init();
-
-    int data1 = 1, data2 = 2, data3 = 3;
-    nv_stack_push(stack, &data1);
-    nv_stack_push(stack, &data2);
-    nv_stack_push(stack, &data3);
-
-    while (!nv_stack_is_empty(stack)) {
-        int* data = (int*)nv_stack_pop(stack);
-        printf("Popped: %d\n", *data);
-    }
-
-    nv_stack_destroy(stack);
-    return 0;
-}

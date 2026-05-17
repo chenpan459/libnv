@@ -121,25 +121,3 @@ void nv_graph_traverse(nv_graph_t* graph) {
         vertex = vertex->next;
     }
 }
-
-int nv_graph_main() {
-    nv_graph_t* graph = nv_graph_init();
-
-    nv_graph_add_vertex(graph, 1);
-    nv_graph_add_vertex(graph, 2);
-    nv_graph_add_vertex(graph, 3);
-
-    nv_graph_add_edge(graph, 1, 2);
-    nv_graph_add_edge(graph, 1, 3);
-    nv_graph_add_edge(graph, 2, 3);
-
-    nv_graph_traverse(graph);
-
-    nv_graph_remove_edge(graph, 1, 2);
-    nv_graph_remove_vertex(graph, 3);
-
-    nv_graph_traverse(graph);
-
-    nv_graph_destroy(graph);
-    return 0;
-}

@@ -47,5 +47,3 @@ int nv_abs(int num) {
 double nv_fabs(double num) {
     return fabs(num);
 }
-
-

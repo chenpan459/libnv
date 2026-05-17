@@ -71,6 +71,3 @@ int nv_create_daemon() {
 
     return 0;
 }
-
-
-

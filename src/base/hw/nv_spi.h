@@ -27,15 +27,6 @@ int nv_spi_configure(nv_spi_t* spi, uint8_t mode, uint8_t bits_per_word, uint32_
 ssize_t nv_spi_transfer(nv_spi_t* spi, const uint8_t* tx_buf, uint8_t* rx_buf, size_t len) ;
 // 关闭 SPI 设备
 void nv_spi_close(nv_spi_t* spi) ;
-
-
-
-
-int nv_spi_main() ;
-
-
-
-
 #ifdef __cplusplus
 }
 #endif

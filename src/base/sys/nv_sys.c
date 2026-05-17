@@ -20,4 +20,3 @@ void nv_nsleep(unsigned int nanoseconds) {
     req.tv_nsec = nanoseconds % 1000000000; // 纳秒
     nanosleep(&req, NULL);
 }
-

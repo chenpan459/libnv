@@ -61,11 +61,6 @@ int nv_epoll_del(nv_epoll_t *epoll_obj, int fd) ;
 // 等待事件发生
 int nv_epoll_wait(nv_epoll_t *epoll_obj, int timeout) ;
 void nv_epoll_destroy(nv_epoll_t *epoll_obj) ;
-
-
-int nv_epoll_main() ;
-
-
 #ifdef __cplusplus
 }
 #endif

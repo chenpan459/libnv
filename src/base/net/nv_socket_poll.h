@@ -39,11 +39,6 @@ int nv_poll_add_fd(nv_poll_t *poll_obj, int fd, int events) ;
 int nv_poll_remove_fd(nv_poll_t *poll_obj, int fd) ;
 int nv_poll_wait(nv_poll_t *poll_obj, int timeout) ;
 void nv_poll_destroy(nv_poll_t *poll_obj) ;
-
-
-
-int nv_poll_main() ;
-
 #ifdef __cplusplus
 }
 #endif

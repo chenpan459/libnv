@@ -275,8 +275,16 @@ static int nv_main_pidfile_create(nv_main_ctx_t *ctx)
     }
 
     if (ftruncate(fd, 0) == 0) {
+        ssize_t n;
+        size_t  len;
+
         snprintf(buf, sizeof(buf), "%d\n", (int)getpid());
-        (void)write(fd, buf, strlen(buf));
+        len = strlen(buf);
+        n   = write(fd, buf, len);
+        if (n < 0 || (size_t)n != len) {
+            nv_log_warning("pid file write failed: %s (%s)",
+                           ctx->opts.pid_file, strerror(errno));
+        }
     }
 
     ctx->pid_fd = fd;

@@ -50,13 +50,6 @@ void nv_graph_remove_edge(nv_graph_t* graph, int src, int dest) ;
 
 // 遍历图
 void nv_graph_traverse(nv_graph_t* graph) ;
-
-
-
-int nv_graph_main() ;
-
-
-    
 #ifdef __cplusplus
 }
 #endif

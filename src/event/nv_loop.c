@@ -224,8 +224,11 @@ int nv_loop_wakeup(nv_loop_t *loop) {
     }
     
     if (wakeup_initialized) {
-        char c = 'w';
-        write(wakeup_pipe[1], &c, 1);
+        char    c = 'w';
+        ssize_t n = write(wakeup_pipe[1], &c, 1);
+        if (n < 0 && errno != EAGAIN && errno != EINTR) {
+            return -1;
+        }
     }
     
     return 0;
@@ -402,6 +405,7 @@ static int nv_loop_process_timers(nv_loop_t *loop) {
 
 /* 处理信号事件 */
 static int nv_loop_process_signals(nv_loop_t *loop) {
+    (void)loop;
     /* 这里可以实现信号处理逻辑 */
     return 0;
 }

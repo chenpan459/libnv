@@ -31,12 +31,6 @@ void nv_queue_enqueue(nv_queue_t* queue, void* data) ;
 void* nv_queue_dequeue(nv_queue_t* queue) ;
 // 检查队列是否为空
 bool nv_queue_is_empty(nv_queue_t* queue) ;
-
-
-
-int nv_queue_main() ;
-
-
 #ifdef __cplusplus
 }
 #endif

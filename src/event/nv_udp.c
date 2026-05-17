@@ -3,6 +3,7 @@
 #include <nv_mem.h>
 
 int nv_udp_init(struct nv_loop_s* loop, nv_udp_t* udp){
+    (void)loop;
     udp->socketfd = nv_udp_socket_create();
     if(udp->socketfd < 0){
         return -1;
@@ -360,6 +361,7 @@ int nv_udp_buffer_read(nv_udp_buffer_t *buf, char *data, size_t len) {
 
 /* UDP连接池相关函数 */
 int nv_udp_pool_create(nv_udp_pool_t *pool, struct nv_loop_s *loop, int max_conns) {
+    (void)loop;
     if (!pool) return -1;
     
     pool->connections = malloc(max_conns * sizeof(nv_udp_t*));

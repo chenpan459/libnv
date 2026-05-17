@@ -30,10 +30,6 @@ ssize_t nv_rs485_write(nv_rs485_t* rs485, const void* buffer, size_t size);
 
 // 关闭 RS-485 端口
 void nv_rs485_close(nv_rs485_t* rs485);
-
-
-int nv_rs485_main() ;
-
 #ifdef __cplusplus
 }
 #endif

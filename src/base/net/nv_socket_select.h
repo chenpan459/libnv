@@ -46,11 +46,6 @@ int nv_select_remove_fd(nv_select_t *select_obj, int fd) ;
 int nv_select_set_timeout(nv_select_t *select_obj, long sec, long usec) ;
 int nv_select_wait(nv_select_t *select_obj) ;
 void nv_select_destroy(nv_select_t *select_obj) ;
-
-
-
-int nv_select_main() ;
-
 #ifdef __cplusplus
 }
 #endif

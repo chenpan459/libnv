@@ -25,9 +25,6 @@ int nv_send_message_timeout(message_queue_t* queue, const char* msg, const struc
 int nv_receive_message_timeout(message_queue_t* queue, char* buffer, size_t buffer_size, unsigned int* prio, const struct timespec* abstime);
 
 void nv_destroy_message_queue(message_queue_t* queue);
-
-int message_queue_main();
-
 #ifdef __cplusplus
 }
 #endif

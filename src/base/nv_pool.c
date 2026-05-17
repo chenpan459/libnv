@@ -371,6 +371,7 @@ int nv_pool_extend(nv_pool_t *pool, size_t size) {
 
 /* 内存池收缩函数 */
 int nv_pool_shrink(nv_pool_t *pool, size_t size) {
+    (void)pool;
     /* 简单的收缩实现，实际应用中可能需要更复杂的逻辑 */
     nv_log_debug("内存池收缩：目标大小=%zu", size);
     return NV_OK;
@@ -378,6 +379,7 @@ int nv_pool_shrink(nv_pool_t *pool, size_t size) {
 
 /* 内存池压缩函数 */
 int nv_pool_compact(nv_pool_t *pool) {
+    (void)pool;
     /* 简单的压缩实现，实际应用中可能需要更复杂的逻辑 */
     nv_log_debug("内存池压缩完成");
     return NV_OK;
@@ -596,6 +598,8 @@ static void* nv_pool_block_alloc(nv_pool_block_t *block, size_t size) {
 
 /* 在内存块中释放内存 */
 static int nv_pool_block_free(nv_pool_block_t *block, void *ptr) {
+    (void)block;
+    (void)ptr;
     /* 简单的释放实现，实际应用中可能需要更复杂的逻辑 */
     /* 这里只是标记内存为可用，不实际释放 */
     return NV_OK;

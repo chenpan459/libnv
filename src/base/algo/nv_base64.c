@@ -15,7 +15,7 @@ char *nv_base64_encode(const unsigned char *input, size_t length) {
         return NULL;
     }
 
-    int i, j;
+    size_t i, j;
     for (i = 0, j = 0; i < length;) {
         uint32_t octet_a = i < length ? (unsigned char)input[i++] : 0;
         uint32_t octet_b = i < length ? (unsigned char)input[i++] : 0;
@@ -75,7 +75,7 @@ int nv_base64_decode(const char *input, unsigned char **output) {
         return -1;
     }
 
-    int i, j;
+    size_t i, j;
     for (i = 0, j = 0; i < input_length;) {
         int sextet_a = base64_index[(unsigned char)input[i++]];
         int sextet_b = base64_index[(unsigned char)input[i++]];
@@ -93,34 +93,4 @@ int nv_base64_decode(const char *input, unsigned char **output) {
     }
 
     return decoded_length;
-}
-
-
-int nv_base64_main() {
-
-    const char *original_data = "Hello, World!";
-    size_t original_length = strlen(original_data);
-
-    // 编码
-    char *encoded_data = nv_base64_encode((const unsigned char *)original_data, original_length);
-    if (encoded_data == NULL) {
-        fprintf(stderr, "Encoding failed\n");
-        return 1;
-    }
-    printf("Encoded: %s\n", encoded_data);
-
-    // 解码
-    unsigned char *decoded_data;
-    int decoded_length = nv_base64_decode(encoded_data, &decoded_data);
-    if (decoded_length < 0) {
-        fprintf(stderr, "Decoding failed\n");
-        free(encoded_data);
-        return 1;
-    }
-    printf("Decoded: %.*s\n", decoded_length, decoded_data);
-
-    free(encoded_data);
-    free(decoded_data);
-    return 0;
-
 }

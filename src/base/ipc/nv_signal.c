@@ -19,4 +19,3 @@ int nv_signal_send(pid_t pid, int signum) {
 void signal_handler(int signum) {
     printf("接收到信号 %d\n", signum);
 }
-

@@ -103,22 +103,3 @@ void nv_set_remove(nv_set_t* set, const char* data) {
 int nv_set_size(nv_set_t* set) {
     return set->size;
 }
-
-int nv_set_main() {
-    nv_set_t* set = nv_set_init();
-
-    nv_set_add(set, "element1");
-    nv_set_add(set, "element2");
-    nv_set_add(set, "element3");
-
-    printf("Set contains 'element2': %s\n", nv_set_contains(set, "element2") ? "true" : "false");
-    printf("Set size: %d\n", nv_set_size(set));
-
-    nv_set_remove(set, "element2");
-
-    printf("Set contains 'element2': %s\n", nv_set_contains(set, "element2") ? "true" : "false");
-    printf("Set size: %d\n", nv_set_size(set));
-
-    nv_set_destroy(set);
-    return 0;
-}

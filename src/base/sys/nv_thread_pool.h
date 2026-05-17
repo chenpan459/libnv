@@ -58,8 +58,6 @@ int nv_threadpool_wait_idle(threadpool_t *tp);
 void *nv_threadpool_thread(void *threadpool);
 
 /* 示例入口（可选） */
-int nv_thread_pool_main();
-
 #ifdef __cplusplus
 }
 #endif
