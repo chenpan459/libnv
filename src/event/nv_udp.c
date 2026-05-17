@@ -2,8 +2,10 @@
 #include <nv_socket.h>
 #include <nv_mem.h>
 #include <nv_log.h>
+#include <nv_event.h>
 #include <errno.h>
 #include <string.h>
+#include <sys/epoll.h>
 
 int nv_udp_init(struct nv_loop_s* loop, nv_udp_t* udp){
     (void)loop;
@@ -122,46 +124,51 @@ int nv_udp_server_start(nv_udp_server_t *server) {
     if (!server || !server->listener || server->listener->socketfd == -1) return -1;
     
     server->listener->state = NV_UDP_BOUND;
-    
-    /* 创建接收数据的事件 */
-    nv_event_ext_t *recv_event = malloc(sizeof(nv_event_ext_t));
-    if (!recv_event) return -1;
-    
-    /* 手动初始化事件结构 */
-    memset(recv_event, 0, sizeof(nv_event_ext_t));
-    recv_event->fd = server->listener->socketfd;
-    recv_event->events = NV_EVENT_READ;
-    recv_event->data = server;
-    recv_event->type = NV_EVENT_TYPE_IO;
-    recv_event->priority = NV_EVENT_PRIO_NORMAL;
-    
-    /* 添加到事件循环 */
-    if (nv_loop_add_event(server->loop, recv_event, NV_EVENT_READ) != 0) {
-        free(recv_event);
+
+    memset(&server->listener->read_event, 0, sizeof(nv_event_ext_t));
+    server->listener->read_event.fd       = server->listener->socketfd;
+    server->listener->read_event.data     = server;
+    server->listener->read_event.type     = NV_EVENT_TYPE_IO;
+    server->listener->read_event.priority = NV_EVENT_PRIO_NORMAL;
+
+    if (nv_loop_add_event(server->loop, &server->listener->read_event, EPOLLIN) != 0) {
         return -1;
     }
-    
-    /* 保存事件引用 */
-    server->listener->read_event = *recv_event;
-    free(recv_event);
     return 0;
 }
 
 int nv_udp_server_stop(nv_udp_server_t *server) {
-    if (!server) return -1;
-    
+    if (!server) {
+        return -1;
+    }
+
+    if (server->listener && server->loop &&
+        server->listener->read_event.active) {
+        nv_loop_del_event(server->loop, &server->listener->read_event);
+        nv_event_cleanup(&server->listener->read_event);
+    }
+
     if (server->listener && server->listener->socketfd != -1) {
         close(server->listener->socketfd);
         server->listener->socketfd = -1;
         server->listener->state = NV_UDP_CLOSED;
     }
-    
+
     if (server->listener) {
         free(server->listener);
         server->listener = NULL;
     }
-    
+
     return 0;
+}
+
+void nv_udp_server_destroy(nv_udp_server_t *server)
+{
+    if (!server) {
+        return;
+    }
+    nv_udp_server_stop(server);
+    memset(server, 0, sizeof(*server));
 }
 
 /* UDP客户端相关函数 */

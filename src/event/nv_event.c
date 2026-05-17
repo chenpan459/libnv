@@ -9,6 +9,7 @@
  ***********************************************/
 
 #include "nv_event.h"
+#include "nv_loop.h"
 #include <string.h>
 #include <errno.h>
 
@@ -46,10 +47,8 @@ int nv_event_init(nv_event_ext_t *ev, nv_event_handler_t handler, void *data) {
 void nv_event_cleanup(nv_event_ext_t *ev) {
     if (!ev) return;
     
-    /* 从事件循环中移除 */
-    if (ev->loop) {
-        /* 这里应该调用事件循环的移除函数 */
-        ev->loop = NULL;
+    if (ev->loop && ev->active && ev->fd >= 0) {
+        nv_loop_del_event(ev->loop, ev);
     }
     
     /* 从链表中移除 */

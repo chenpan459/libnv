@@ -2,8 +2,10 @@
 #include <nv_socket.h>
 #include <nv_mem.h>
 #include <nv_log.h>
+#include <nv_event.h>
 #include <errno.h>
 #include <string.h>
+#include <sys/epoll.h>
 
 int nv_tcp_init(struct nv_loop_s* loop, nv_tcp_t* tcp){
     tcp->socketfd = nv_tcp_socket_create();
@@ -136,46 +138,51 @@ int nv_tcp_server_start(nv_tcp_server_t *server) {
     }
     
     server->listener->state = NV_TCP_LISTENING;
-    
-    /* 创建接受连接的事件 */
-    nv_event_ext_t *accept_event = malloc(sizeof(nv_event_ext_t));
-    if (!accept_event) return -1;
-    
-    /* 手动初始化事件结构 */
-    memset(accept_event, 0, sizeof(nv_event_ext_t));
-    accept_event->fd = server->listener->socketfd;
-    accept_event->events = NV_EVENT_READ;
-    accept_event->data = server;
-    accept_event->type = NV_EVENT_TYPE_IO;
-    accept_event->priority = NV_EVENT_PRIO_NORMAL;
-    
-    /* 添加到事件循环 */
-    if (nv_loop_add_event(server->loop, accept_event, NV_EVENT_READ) != 0) {
-        free(accept_event);
+
+    memset(&server->listener->read_event, 0, sizeof(nv_event_ext_t));
+    server->listener->read_event.fd       = server->listener->socketfd;
+    server->listener->read_event.data       = server;
+    server->listener->read_event.type       = NV_EVENT_TYPE_IO;
+    server->listener->read_event.priority   = NV_EVENT_PRIO_NORMAL;
+
+    if (nv_loop_add_event(server->loop, &server->listener->read_event, EPOLLIN) != 0) {
         return -1;
     }
-    
-    /* 保存事件引用 */
-    server->listener->read_event = *accept_event;
-    free(accept_event);
     return 0;
 }
 
 int nv_tcp_server_stop(nv_tcp_server_t *server) {
-    if (!server) return -1;
-    
+    if (!server) {
+        return -1;
+    }
+
+    if (server->listener && server->loop &&
+        server->listener->read_event.active) {
+        nv_loop_del_event(server->loop, &server->listener->read_event);
+        nv_event_cleanup(&server->listener->read_event);
+    }
+
     if (server->listener && server->listener->socketfd != -1) {
         close(server->listener->socketfd);
         server->listener->socketfd = -1;
         server->listener->state = NV_TCP_CLOSED;
     }
-    
+
     if (server->listener) {
         free(server->listener);
         server->listener = NULL;
     }
-    
+
     return 0;
+}
+
+void nv_tcp_server_destroy(nv_tcp_server_t *server)
+{
+    if (!server) {
+        return;
+    }
+    nv_tcp_server_stop(server);
+    memset(server, 0, sizeof(*server));
 }
 
 /* TCP客户端相关函数 */

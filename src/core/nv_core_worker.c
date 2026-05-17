@@ -9,7 +9,7 @@
 #include <sys/wait.h>
 #include <signal.h>
 
-extern char **g_saved_argv;
+#include "nv_core_private.h"
 
 #define NV_CORE_WORKER_MAX 128
 
