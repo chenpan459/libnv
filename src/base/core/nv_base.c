@@ -1,9 +1,9 @@
 /************************************************
- * @文件名: nv_core.c
+ * @文件名: nv_base.c
  * @功能: libnv 核心层实现（模块注册与周期管理）
  ***********************************************/
 
-#include "nv_core.h"
+#include "nv_base.h"
 #include <string.h>
 #include <stdlib.h>
 
@@ -11,7 +11,7 @@ static nv_module_t *g_modules[NV_MODULE_MAX];
 static int g_module_count = 0;
 static nv_cycle_t *g_cycle = NULL;
 
-int nv_core_register_module(nv_module_t *module)
+int nv_base_register_module(nv_module_t *module)
 {
     if (!module || g_module_count >= NV_MODULE_MAX) {
         return NV_ERROR;
@@ -20,7 +20,7 @@ int nv_core_register_module(nv_module_t *module)
     return NV_OK;
 }
 
-int nv_core_init(nv_conf_t *conf)
+int nv_base_init(nv_conf_t *conf)
 {
     int i;
     for (i = 0; i < g_module_count; i++) {
@@ -33,7 +33,7 @@ int nv_core_init(nv_conf_t *conf)
     return NV_OK;
 }
 
-int nv_core_cleanup(void)
+int nv_base_cleanup(void)
 {
     int i;
     for (i = g_module_count - 1; i >= 0; i--) {
@@ -45,7 +45,7 @@ int nv_core_cleanup(void)
     return NV_OK;
 }
 
-nv_cycle_t *nv_core_create_cycle(nv_conf_t *conf)
+nv_cycle_t *nv_base_create_cycle(nv_conf_t *conf)
 {
     nv_cycle_t *cycle;
 
@@ -61,7 +61,7 @@ nv_cycle_t *nv_core_create_cycle(nv_conf_t *conf)
     return cycle;
 }
 
-int nv_core_run_cycle(nv_cycle_t *cycle)
+int nv_base_run_cycle(nv_cycle_t *cycle)
 {
     if (!cycle) {
         return NV_ERROR;

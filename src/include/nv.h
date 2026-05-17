@@ -17,10 +17,10 @@ extern "C" {
 #endif
 
 #include <nv_config.h>
+#include <nv_base.h>
 #include <nv_core.h>
 #include <nv_event.h>
 #include <nv_loop.h>
-#include <nv_main.h>
 
 /* 状态返回值 */
 #define NV_SUCC 0        /* 成功 */

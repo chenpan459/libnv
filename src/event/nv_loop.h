@@ -13,7 +13,7 @@
 #define _NV_LOOP_H_INCLUDED_
 
 #include <nv_config.h>
-#include <nv_core.h>
+#include <nv_base.h>
 
 /* 前向声明 */
 typedef struct nv_event_ext_s nv_event_ext_t;
@@ -81,6 +81,9 @@ typedef struct nv_loop_s {
         unsigned long signals_processed;
         unsigned long idle_events_processed;
     } stats;
+
+    int signalfd_fd;
+    nv_event_ext_t *signalfd_ev;
     
     void *private_data;
 } nv_loop_t;
@@ -102,6 +105,10 @@ int nv_loop_cleanup(nv_loop_t *loop);
 int nv_loop_run(nv_loop_t *loop);
 int nv_loop_stop(nv_loop_t *loop);
 int nv_loop_wakeup(nv_loop_t *loop);
+
+/* signalfd 接入 epoll（fd 由 nv_signal_fd() 提供） */
+int nv_loop_attach_signalfd(nv_loop_t *loop, int signalfd_fd);
+void nv_loop_detach_signalfd(nv_loop_t *loop);
 
 /* 事件管理API */
 int nv_loop_add_event(nv_loop_t *loop, nv_event_ext_t *ev, int events);

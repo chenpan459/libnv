@@ -21,7 +21,7 @@ extern "C" {
 #include  <nv_config.h>
 
 #include <sys/types.h> 
-#include <nv_core.h>
+#include <nv_base.h>
 
 
 #if EDOM > 0

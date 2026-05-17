@@ -10,6 +10,7 @@
 
 #include "nv_loop.h"
 #include "nv_event.h"
+#include <nv_signal.h>
 #include <string.h>
 #include <errno.h>
 #include <unistd.h>
@@ -110,6 +111,8 @@ int nv_loop_cleanup(nv_loop_t *loop) {
         nv_event_cleanup(ev);
     }
     
+    nv_loop_detach_signalfd(loop);
+
     /* 清理信号事件 */
     if (loop->signals.signal_events) {
         for (int i = 0; i < loop->signals.signal_count; i++) {
@@ -146,7 +149,10 @@ int nv_loop_run(nv_loop_t *loop) {
     
     loop->state = NV_LOOP_RUNNING;
     
-    while (loop->state == NV_LOOP_RUNNING) {
+    while (loop->state == NV_LOOP_RUNNING || loop->state == NV_LOOP_STOPPING) {
+        if (loop->state == NV_LOOP_STOPPING) {
+            break;
+        }
         int timeout = -1; /* 默认阻塞 */
         
         /* 计算下次超时时间 */
@@ -195,6 +201,7 @@ int nv_loop_stop(nv_loop_t *loop) {
     
     if (loop->state == NV_LOOP_RUNNING) {
         loop->state = NV_LOOP_STOPPING;
+        nv_loop_wakeup(loop);
     }
     
     return 0;
@@ -348,13 +355,67 @@ int nv_loop_del_idle(nv_loop_t *loop, nv_event_ext_t *ev) {
     return 0;
 }
 
+static void nv_loop_signalfd_handler(nv_loop_t *loop, void *ev, void *data)
+{
+    (void)ev;
+    (void)data;
+    if (loop && loop->signalfd_fd >= 0) {
+        nv_signal_dispatch(loop->signalfd_fd);
+        loop->stats.signals_processed++;
+    }
+}
+
+int nv_loop_attach_signalfd(nv_loop_t *loop, int signalfd_fd)
+{
+    if (!loop || signalfd_fd < 0 || loop->epoll_fd < 0) {
+        return -1;
+    }
+
+    if (loop->signalfd_ev) {
+        nv_loop_detach_signalfd(loop);
+    }
+
+    loop->signalfd_ev = (nv_event_ext_t *)calloc(1, sizeof(nv_event_ext_t));
+    if (!loop->signalfd_ev) {
+        return -1;
+    }
+
+    loop->signalfd_fd           = signalfd_fd;
+    loop->signalfd_ev->fd       = signalfd_fd;
+    loop->signalfd_ev->type     = NV_EVENT_TYPE_IO;
+    loop->signalfd_ev->handler  = nv_loop_signalfd_handler;
+    loop->signalfd_ev->data     = loop;
+    loop->signalfd_ev->loop     = loop;
+
+    if (nv_loop_add_event(loop, loop->signalfd_ev, EPOLLIN) != 0) {
+        free(loop->signalfd_ev);
+        loop->signalfd_ev  = NULL;
+        loop->signalfd_fd  = -1;
+        return -1;
+    }
+
+    return 0;
+}
+
+void nv_loop_detach_signalfd(nv_loop_t *loop)
+{
+    if (!loop || !loop->signalfd_ev) {
+        return;
+    }
+
+    nv_loop_del_event(loop, loop->signalfd_ev);
+    free(loop->signalfd_ev);
+    loop->signalfd_ev = NULL;
+    loop->signalfd_fd = -1;
+}
+
 /* 处理IO事件 */
 static int nv_loop_process_io_events(nv_loop_t *loop) {
     for (int i = 0; i < loop->event_count; i++) {
         struct epoll_event *epoll_ev = &loop->events[i];
         nv_event_ext_t *ev = (nv_event_ext_t *)epoll_ev->data.ptr;
         
-        if (!ev) continue; /* 唤醒事件 */
+        if (!ev) continue; /* 唤醒管道 */
         
         /* 转换epoll事件到libnv事件 */
         int revents = 0;

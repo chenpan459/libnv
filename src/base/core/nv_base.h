@@ -1,5 +1,5 @@
 /************************************************
- * @文件名: nv_core.h
+ * @文件名: nv_base.h
  * @功能: libnv核心层头文件，定义核心数据结构和接口
  * @作者: chenpan
  * @日期: 2024-11-04
@@ -10,8 +10,8 @@
  * 2024-11-04 - 集成内存池模块
  ***********************************************/
 
-#ifndef _NV_CORE_H_INCLUDED_
-#define _NV_CORE_H_INCLUDED_
+#ifndef _NV_BASE_H_INCLUDED_
+#define _NV_BASE_H_INCLUDED_
 
 #include <nv_config.h>
 
@@ -116,10 +116,10 @@ typedef int (*nv_module_init_pt)(void *ctx);
 typedef int (*nv_module_cleanup_pt)(void *ctx);
 
 /* 核心API函数声明 */
-int nv_core_init(nv_conf_t *conf);
-int nv_core_cleanup(void);
-nv_cycle_t* nv_core_create_cycle(nv_conf_t *conf);
-int nv_core_run_cycle(nv_cycle_t *cycle);
+int nv_base_init(nv_conf_t *conf);
+int nv_base_cleanup(void);
+nv_cycle_t* nv_base_create_cycle(nv_conf_t *conf);
+int nv_base_run_cycle(nv_cycle_t *cycle);
 
 /* 内存池API函数声明（前向声明） */
 /* 注意：这些函数的具体实现和类型定义在 nv_pool.h 中 */
@@ -142,17 +142,17 @@ int nv_core_run_cycle(nv_cycle_t *cycle);
 #endif
 
 /* 核心模块注册宏 */
-#define NV_MODULE_REGISTER(type, name, init_func, cleanup_func) \
-    static nv_module_t nv_module_##name = { \
-        .type = type, \
-        .name = #name, \
-        .init = init_func, \
-        .cleanup = cleanup_func, \
+#define NV_MODULE_REGISTER(mod_type, mod_name, init_func, cleanup_func) \
+    static nv_module_t nv_module_##mod_name = { \
+        .type = (mod_type), \
+        .name = #mod_name, \
+        .init = (init_func), \
+        .cleanup = (cleanup_func), \
         .private_data = NULL \
     }; \
     __attribute__((constructor)) \
-    void nv_module_##name##_register(void) { \
-        nv_core_register_module(&nv_module_##name); \
+    void nv_module_##mod_name##_register(void) { \
+        nv_base_register_module(&nv_module_##mod_name); \
     }
 
 /* 内存池模块注册宏 */
@@ -160,8 +160,8 @@ int nv_core_run_cycle(nv_cycle_t *cycle);
     NV_MODULE_REGISTER(NV_MODULE_MEMORY_POOL, name, init_func, cleanup_func)
 
 /* 内部函数声明 */
-int nv_core_register_module(nv_module_t *module);
+int nv_base_register_module(nv_module_t *module);
 
 void nv_cpuinfo(void);
 
-#endif /* _NV_CORE_H_INCLUDED_ */
+#endif /* _NV_BASE_H_INCLUDED_ */

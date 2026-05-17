@@ -17,7 +17,7 @@ extern "C" {
 #endif
 
 #include <nv_config.h>
-#include <nv_core.h>
+#include <nv_base.h>
 
 /* 前向声明 */
 typedef struct nv_loop_s nv_loop_t;

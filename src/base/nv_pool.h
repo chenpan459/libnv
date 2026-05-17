@@ -13,7 +13,7 @@
 #define _NV_POOL_H_INCLUDED_
 
 #include <nv_config.h>
-#include <nv_core.h>
+#include <nv_base.h>
 
 /* 内存池块大小定义 */
 #define NV_POOL_MIN_SIZE       (4 * 1024)      /* 最小内存池大小 4KB */

@@ -379,6 +379,21 @@ int nv_udp_pool_create(nv_udp_pool_t *pool, struct nv_loop_s *loop, int max_conn
     return 0;
 }
 
+void nv_udp_pool_destroy(nv_udp_pool_t *pool)
+{
+    if (!pool) {
+        return;
+    }
+    if (pool->connections) {
+        free(pool->connections);
+        pool->connections = NULL;
+    }
+    pthread_mutex_destroy(&pool->mutex);
+    pool->max_connections     = 0;
+    pool->current_connections = 0;
+    pool->free_connections    = 0;
+}
+
 int nv_udp_pool_return_connection(nv_udp_pool_t *pool, nv_udp_t *conn) {
     if (!pool || !conn) return -1;
     

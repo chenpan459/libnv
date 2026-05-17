@@ -7,7 +7,7 @@
  ***********************************************/
 
 
-#include <nv_core.h>
+#include <nv_base.h>
 #include <nv_shmem.h>
 
 
