@@ -1,0 +1,15 @@
+# CMake 构建目录（.o / .a / .so 等均在此）
+build/
+build-check/
+
+# 旧 Makefile 产物
+lib/
+*.o
+*.os
+*.a
+*.so
+*.d
+
+# 防止源码树中出现中间文件
+src/**/*.o
+src/**/*.os

@@ -1,69 +1,88 @@
 cmake_minimum_required(VERSION 3.10)
 
-# 项目名称和版本
-project(libnv VERSION 1.0 LANGUAGES C)
+# 禁止在源码目录内配置/编译，所有 .o 等中间文件只生成在 build/ 下
+if(CMAKE_SOURCE_DIR STREQUAL CMAKE_BINARY_DIR)
+    message(FATAL_ERROR
+        "禁止在源码目录内构建（会在 src/ 下产生 .o 文件）。\n"
+        "请使用独立构建目录，例如：\n"
+        "  cmake -S . -B build\n"
+        "  cmake --build build")
+endif()
 
-# 设置 C 标准
+project(libnv VERSION 1.0.0 LANGUAGES C)
+
 set(CMAKE_C_STANDARD 99)
-set(CMAKE_C_STANDARD_REQUIRED True)
+set(CMAKE_C_STANDARD_REQUIRED ON)
+set(CMAKE_C_EXTENSIONS OFF)
 
+# 所有产物统一输出到 build/ 目录
+set(CMAKE_RUNTIME_OUTPUT_DIRECTORY "${CMAKE_BINARY_DIR}/bin")
+set(CMAKE_LIBRARY_OUTPUT_DIRECTORY "${CMAKE_BINARY_DIR}/lib")
+set(CMAKE_ARCHIVE_OUTPUT_DIRECTORY "${CMAKE_BINARY_DIR}/lib")
 
-# 递归查找所有头文件
-file(GLOB_RECURSE HEADER_FILES "${PROJECT_SOURCE_DIR}/src/*.h")
+# 选项
+option(NV_ENABLE_USB      "Build USB module (requires libusb-1.0)" ON)
+option(NV_BUILD_STATIC    "Build static library libnv.a"           ON)
+option(NV_BUILD_APP       "Build main process daemon (nvd)"        ON)
+option(NV_BUILD_EXAMPLES  "Build examples (部分示例待修复)"        OFF)
+option(NV_BUILD_TESTS     "Build tests (部分测试待修复)"           OFF)
+option(NV_ENABLE_FEATURE "Enable ENABLE_FEATURE compile define"   ON)
 
-# 打印 HEADER_FILES 变量内容
-message("HEADER_FILES: ${HEADER_FILES}")
+if(NV_ENABLE_FEATURE)
+    set(NV_COMPILE_DEFS ENABLE_FEATURE)
+endif()
 
-# 包含头文件目录
-include_directories(${PROJECT_SOURCE_DIR}/src)
+find_package(Threads REQUIRED)
 
+# 核心库
+add_subdirectory(src)
 
-# 查找所有源文件
-#file(GLOB SOURCES "${PROJECT_SOURCE_DIR}/src/*.c")
-file(GLOB_RECURSE SOURCES "${PROJECT_SOURCE_DIR}/src/*.c")
+if(NOT NV_BUILD_STATIC)
+    message(STATUS "NV_BUILD_STATIC=OFF: only building shared library")
+    # nv_static 已在 src/CMakeLists.txt 创建；此处不强制删除，仅提示
+endif()
 
+# 主进程守护程序
+if(NV_BUILD_APP)
+    add_subdirectory(app)
+endif()
 
+# 示例
+if(NV_BUILD_EXAMPLES)
+    add_subdirectory(examples)
+endif()
 
-# 添加动态库
-add_library(nv SHARED ${SOURCES} ${HEADER_FILES})
+# 测试程序
+if(NV_BUILD_TESTS)
+    add_subdirectory(test)
+endif()
 
+# 安装（可选）
+include(GNUInstallDirs)
+install(TARGETS nv_shared
+    LIBRARY DESTINATION ${CMAKE_INSTALL_LIBDIR}
+    ARCHIVE DESTINATION ${CMAKE_INSTALL_LIBDIR}
+)
+if(NV_BUILD_STATIC)
+    install(TARGETS nv_static ARCHIVE DESTINATION ${CMAKE_INSTALL_LIBDIR})
+endif()
+install(DIRECTORY src/ DESTINATION ${CMAKE_INSTALL_INCLUDEDIR}/nv
+    FILES_MATCHING PATTERN "*.h"
+)
 
-# 自动添加所有包含头文件的目录
-set(INCLUDE_DIRS "")
-foreach(header ${HEADER_FILES})
-    get_filename_component(dir ${header} DIRECTORY)
-    list(APPEND INCLUDE_DIRS ${dir})
-endforeach()
-list(REMOVE_DUPLICATES INCLUDE_DIRS)
+message(STATUS "")
+message(STATUS "libnv ${PROJECT_VERSION}")
+message(STATUS "  Build type:     ${CMAKE_BUILD_TYPE}")
+message(STATUS "  Install prefix: ${CMAKE_INSTALL_PREFIX}")
+message(STATUS "  NV_ENABLE_USB:  ${NV_ENABLE_USB}")
+message(STATUS "  NV_BUILD_APP:   ${NV_BUILD_APP}")
+message(STATUS "  NV_BUILD_TESTS: ${NV_BUILD_TESTS}")
+message(STATUS "  Build dir:      ${CMAKE_BINARY_DIR}")
+message(STATUS "")
 
-target_include_directories(nv PRIVATE ${INCLUDE_DIRS})
-
-
-
-add_definitions(-D_GNU_SOURCE)
-
-# 设置目标属性以确保 CMake 知道链接语言
-set_target_properties(nv PROPERTIES LINKER_LANGUAGE C)
-
-
-#################### 定义宏开关###############################
-add_definitions(-DENABLE_FEATURE)
-# 或者使用 target_compile_definitions
-# target_compile_definitions(nv PRIVATE ENABLE_FEATURE)
-##############################################################
-
-###################### 定义选项开关##########################
-#option(ENABLE_GMT_0105_RNG "Enable GM/T 0105 Software RNG" OFF)
-## 根据选项开关定义宏
-#if(ENABLE_GMT_0105_RNG)
-#    add_definitions(-DENABLE_GMT_0105_RNG)
-#    # 或者使用 target_compile_definitions
-#    # target_compile_definitions(nv PRIVATE ENABLE_GMT_0105_RNG)
-#endif()
-###################################################################
-
-# 添加可执行文件
-#add_executable(arp_aging_message ${PROJECT_SOURCE_DIR}/test/arp/arp_aging_message.c)
-# 链接动态库到可执行文件
-#target_link_libraries(arp_aging_message nv)
-
+# 清理源码目录中遗留的 .o（旧 Makefile 在 src/ 内编译的产物）
+add_custom_target(clean-src-objects
+    COMMAND find "${CMAKE_SOURCE_DIR}/src" -name "*.o" -delete
+    COMMAND find "${CMAKE_SOURCE_DIR}/src" -name "*.os" -delete
+    COMMENT "Remove stray object files from source tree"
+)

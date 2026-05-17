@@ -1,26 +1,18 @@
 #!/bin/bash
+# 使用 CMake 快速验证核心模块能否编译
 
-echo "Testing compilation of TCP and UDP modules..."
+set -e
 
-# 测试TCP模块编译
-echo "Testing TCP module compilation..."
-gcc -c -I./src -I./src/core -I./src/event src/event/nv_tcp.c -o /tmp/nv_tcp_test.o
-if [ $? -eq 0 ]; then
-    echo "✓ TCP module compiles successfully"
-else
-    echo "✗ TCP module compilation failed"
-fi
+BUILD_DIR="${BUILD_DIR:-build-check}"
 
-# 测试UDP模块编译
-echo "Testing UDP module compilation..."
-gcc -c -I./src -I./src/core -I./src/event src/event/nv_udp.c -o /tmp/nv_udp_test.o
-if [ $? -eq 0 ]; then
-    echo "✓ UDP module compiles successfully"
-else
-    echo "✗ UDP module compilation failed"
-fi
+echo "Configuring CMake..."
+cmake -S . -B "${BUILD_DIR}" \
+    -DCMAKE_BUILD_TYPE=Debug \
+    -DNV_BUILD_APP=ON \
+    -DNV_BUILD_EXAMPLES=OFF \
+    -DNV_BUILD_TESTS=OFF
 
-# 清理测试文件
-rm -f /tmp/nv_tcp_test.o /tmp/nv_udp_test.o
+echo "Building libnv..."
+cmake --build "${BUILD_DIR}" --target nv_shared -j"$(nproc 2>/dev/null || echo 4)"
 
-echo "Compilation test completed."
+echo "Compilation test completed successfully."

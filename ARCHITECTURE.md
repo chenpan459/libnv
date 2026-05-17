@@ -472,16 +472,19 @@ int main() {
 ### 12.2 编译步骤
 
 ```bash
-mkdir build && cd build
-cmake ..
-make
-make install
+cmake -S . -B build -DCMAKE_BUILD_TYPE=Release
+cmake --build build -j$(nproc)
+cmake --install build   # 可选
 ```
 
 ### 12.3 配置选项
 
 ```bash
-cmake -DENABLE_DEBUG=ON -DENABLE_TESTS=ON -DENABLE_MEMORY_POOL=ON ..
+cmake -S . -B build \
+  -DNV_BUILD_APP=ON \
+  -DNV_BUILD_EXAMPLES=ON \
+  -DNV_BUILD_TESTS=ON \
+  -DNV_ENABLE_USB=ON
 ```
 
 ## 13. 性能特性
@@ -532,7 +535,48 @@ cmake -DENABLE_DEBUG=ON -DENABLE_TESTS=ON -DENABLE_MEMORY_POOL=ON ..
 - 嵌入式系统支持
 - 云原生支持
 
-## 15. 总结
+## 15. 主进程架构 (Main Process)
+
+主进程采用五阶段生命周期，由 `src/main/nv_main.h` / `nv_main.c` 实现，示例守护进程入口为 `app/nvd.c`。
+
+```
+主进程
+├── 1. 启动初始化 (nv_main_startup_init)
+│   ├── 解析命令行参数 (nv_main_parse_args)
+│   ├── 加载配置文件 (nv_main_load_config)
+│   ├── 创建守护进程 (nv_create_daemon)
+│   ├── 日志初始化 (nv_log_init_file / nv_log_init_syslog)
+│   ├── 创建 PID 文件 (fcntl 文件锁，防多开)
+│   └── 信号注册 SIGINT/SIGTERM/SIGHUP/SIGUSR1
+├── 2. 业务模块初始化 (nv_main_business_init)
+│   ├── 事件循环 epoll (nv_loop_init)
+│   ├── 线程池 (nv_threadpool_create)
+│   └── 消息队列 (nv_init_message_queue)
+├── 3. 主事件循环 (nv_main_run_loop → nv_loop_run)
+│   ├── epoll IO 事件
+│   ├── 定时器调度
+│   ├── 信号/消息处理
+│   └── 空闲检测 (idle 回调，配置重载)
+├── 4. 优雅退出 (nv_main_shutdown)
+│   ├── 停止事件循环
+│   ├── 释放线程池/消息队列/事件循环
+│   ├── 删除 PID 文件
+│   └── 关闭日志
+└── 5. 异常处理 (nv_main_exception_init)
+    ├── core dump (setrlimit RLIMIT_CORE)
+    ├── 致命信号捕获与错误日志
+    └── 安全退出后 re-raise
+```
+
+统一入口：`nv_main_run(ctx, argc, argv, hooks)`。配置文件为 INI 格式（`[section]`、`key = value`、行尾 `;` 注释），由 `nv_ini` 模块解析；默认 `/etc/nv/nv.conf`，可用 `-c` 指定（项目内示例见 `etc/nv.conf`）。
+
+| 信号 | 行为 |
+|------|------|
+| SIGINT / SIGTERM | 优雅退出 |
+| SIGHUP | 重载配置 |
+| SIGUSR1 | 退出并 re-exec 重启 |
+
+## 16. 总结
 
 libnv 是一个设计精良、功能完整的高性能基础库，采用现代化的架构设计理念，为开发者提供了强大而灵活的基础设施支持。通过模块化设计、事件驱动架构、异步I/O和内存池管理等特性，libnv 能够满足高性能网络应用的需求，同时保持良好的可维护性和可扩展性。
 

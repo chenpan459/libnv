@@ -20,6 +20,7 @@ extern "C" {
 #include <nv_core.h>
 #include <nv_event.h>
 #include <nv_loop.h>
+#include <nv_main.h>
 
 /* 状态返回值 */
 #define NV_SUCC 0        /* 成功 */
