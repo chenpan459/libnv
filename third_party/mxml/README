@@ -1,0 +1,4 @@
+Mini-XML (mxml) v4.0.3 — Apache License 2.0
+https://github.com/michaelrsweet/mxml
+
+Vendored for offline builds. libnv wraps it via src/base/data/nv_xml.h.

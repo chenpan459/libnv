@@ -100,6 +100,11 @@ void* nv_realloc(void *ptr, size_t size);
 void nv_free(void *ptr);
 
 #include <nv_log.h>
+#include <nv_json.h>
+#include <nv_xml.h>
+#ifdef NV_HAVE_SQLITE
+#include <nv_sqlite.h>
+#endif
 
 /* 兼容旧命名（与 nv_log.h 等级一致） */
 #define NV_LOG_DEBUG    NV_LOG_LEVEL_DEBUG

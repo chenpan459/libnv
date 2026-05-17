@@ -8,3 +8,6 @@ enable_testing()
 
 nv_add_unit_test(test_nv_secure test_nv_secure.c)
 nv_add_unit_test(test_nv_log test_nv_log.c)
+nv_add_unit_test(test_nv_json test_nv_json.c)
+nv_add_unit_test(test_nv_xml test_nv_xml.c)
+nv_add_unit_test(test_nv_sqlite test_nv_sqlite.c)

@@ -1,0 +1,5 @@
+SQLite 3.45.1 amalgamation (public domain)
+https://www.sqlite.org/
+
+Generated from upstream source via `make sqlite3.c` for libnv offline builds.
+Wrapped by src/base/data/nv_sqlite.h.
