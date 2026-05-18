@@ -37,6 +37,7 @@ extern "C" {
 #define NV_CORE_DEFAULT_LOG_FILE    "/var/log/nv.log"
 #define NV_CORE_DEFAULT_CTL_SOCKET  "/var/run/nv.ctl.sock"
 #define NV_CORE_DEFAULT_LOCK_NAME   "libnv"
+#define NV_CORE_DEFAULT_PUBSUB_SOCKET "/tmp/nv_pubsub.sock"
 #define NV_CORE_DEFAULT_TELNET_PORT   2323
 #define NV_CORE_DEFAULT_TELNET_BIND "127.0.0.1"
 
@@ -71,6 +72,7 @@ typedef struct nv_core_opts_s {
     int         max_open_files;          /* RLIMIT_NOFILE，0=不修改 */
     long long   core_limit;              /* RLIMIT_CORE 字节，0=禁用，-1=无限 */
     const char *ctl_socket;              /* Unix 控制套接字路径 */
+    const char *pubsub_socket;           /* Unix 发布/订阅 broker socket */
     const char *instance_lock;           /* 抽象锁名称 */
     int         telnet_enable;           /* Telnet CLI */
     int         telnet_port;
@@ -83,6 +85,7 @@ typedef struct nv_core_opts_s {
 
 typedef struct nv_core_ctx_s nv_core_ctx_t;
 typedef struct nv_core_pubsub_s nv_core_pubsub_t;
+typedef struct nv_core_pubsub_ipc_client_s nv_core_pubsub_ipc_client_t;
 
 typedef int  (*nv_core_loadlib_init_pt)(nv_core_ctx_t *ctx, const char *args);
 typedef void (*nv_core_loadlib_cleanup_pt)(nv_core_ctx_t *ctx);
@@ -91,6 +94,10 @@ typedef void (*nv_core_pubsub_handler_pt)(nv_core_ctx_t *ctx,
                                           const void *data,
                                           size_t len,
                                           void *user_data);
+typedef void (*nv_core_pubsub_client_handler_pt)(const char *topic,
+                                                 const void *data,
+                                                 size_t len,
+                                                 void *user_data);
 
 typedef struct nv_core_loadlib_s {
     char                         *path;
@@ -145,6 +152,7 @@ struct nv_core_ctx_s {
     char            *log_file_dup;
     char            *mq_name_dup;
     char            *ctl_socket_dup;
+    char            *pubsub_socket_dup;
     char            *instance_lock_dup;
     char            *telnet_bind_dup;
     char            *cli_username_dup;
@@ -156,6 +164,11 @@ struct nv_core_ctx_s {
     pthread_cond_t   pubsub_cond;
     int              pubsub_inited;
     unsigned long    pubsub_next_id;
+    int              pubsub_ipc_fd;
+    int              pubsub_ipc_running;
+    pthread_t        pubsub_ipc_thread;
+    int              pubsub_ipc_thread_started;
+    nv_core_pubsub_ipc_client_t *pubsub_ipc_clients;
 
     void            *user_data;
 };
@@ -203,6 +216,14 @@ int  nv_core_pubsub_subscribe(nv_core_ctx_t *ctx, const char *topic,
 int  nv_core_pubsub_unsubscribe(nv_core_ctx_t *ctx, void *sub_handle);
 int  nv_core_pubsub_publish(nv_core_ctx_t *ctx, const char *topic,
                             const void *data, size_t len);
+int  nv_core_pubsub_client_publish(const char *server_socket,
+                                   const char *topic,
+                                   const void *data, size_t len);
+int  nv_core_pubsub_client_subscribe(const char *server_socket,
+                                     const char *topic,
+                                     nv_core_pubsub_client_handler_pt handler,
+                                     void *user_data,
+                                     volatile int *stop);
 
 /* 工具 */
 const char *nv_core_phase_name(nv_core_phase_t phase);

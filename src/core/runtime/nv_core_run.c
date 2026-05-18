@@ -153,6 +153,7 @@ void nv_core_shutdown(nv_core_ctx_t *ctx)
     free(ctx->log_file_dup);
     free(ctx->mq_name_dup);
     free(ctx->ctl_socket_dup);
+    free(ctx->pubsub_socket_dup);
     free(ctx->instance_lock_dup);
     free(ctx->telnet_bind_dup);
     free(ctx->cli_username_dup);
@@ -161,6 +162,7 @@ void nv_core_shutdown(nv_core_ctx_t *ctx)
     ctx->log_file_dup = NULL;
     ctx->mq_name_dup  = NULL;
     ctx->ctl_socket_dup = NULL;
+    ctx->pubsub_socket_dup = NULL;
     ctx->instance_lock_dup = NULL;
     ctx->telnet_bind_dup = NULL;
     ctx->cli_username_dup = NULL;

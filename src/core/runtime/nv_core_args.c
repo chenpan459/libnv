@@ -34,6 +34,7 @@ void nv_core_set_defaults(nv_core_ctx_t *ctx)
     ctx->opts.max_open_files          = 0;
     ctx->opts.core_limit              = -1;
     ctx->opts.ctl_socket              = NV_CORE_DEFAULT_CTL_SOCKET;
+    ctx->opts.pubsub_socket           = NV_CORE_DEFAULT_PUBSUB_SOCKET;
     ctx->opts.instance_lock           = NV_CORE_DEFAULT_LOCK_NAME;
     ctx->opts.telnet_enable           = 1;
     ctx->opts.telnet_port             = NV_CORE_DEFAULT_TELNET_PORT;
@@ -72,6 +73,7 @@ void nv_core_set_defaults(nv_core_ctx_t *ctx)
     ctx->log_file_dup = NULL;
     ctx->mq_name_dup  = NULL;
     ctx->ctl_socket_dup = NULL;
+    ctx->pubsub_socket_dup = NULL;
     ctx->instance_lock_dup = NULL;
     ctx->telnet_bind_dup = NULL;
     ctx->cli_username_dup = NULL;
@@ -81,6 +83,10 @@ void nv_core_set_defaults(nv_core_ctx_t *ctx)
     ctx->pubsubs = NULL;
     ctx->pubsub_inited = 0;
     ctx->pubsub_next_id = 0;
+    ctx->pubsub_ipc_fd = -1;
+    ctx->pubsub_ipc_running = 0;
+    ctx->pubsub_ipc_thread_started = 0;
+    ctx->pubsub_ipc_clients = NULL;
 }
 
 void nv_core_cfg_set_str(char **slot, const char *val)
@@ -313,6 +319,12 @@ int nv_core_load_config(nv_core_ctx_t *ctx)
     if (str) {
         nv_core_cfg_set_str(&ctx->ctl_socket_dup, str);
         ctx->opts.ctl_socket = ctx->ctl_socket_dup;
+    }
+
+    str = nv_ini_get_string(ini, "ipc", "pubsub_socket", NULL);
+    if (str) {
+        nv_core_cfg_set_str(&ctx->pubsub_socket_dup, str);
+        ctx->opts.pubsub_socket = ctx->pubsub_socket_dup;
     }
 
     str = nv_ini_get_string(ini, "daemon", "instance_lock", NULL);
