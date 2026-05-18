@@ -32,6 +32,11 @@ void nv_core_idle_handler(nv_loop_t *loop, void *ev, void *data);
 void nv_core_free_saved_argv(void);
 void nv_core_save_argv(int argc, char **argv);
 
+int  nv_core_loadlibs_parse_config(nv_core_ctx_t *ctx);
+int  nv_core_loadlibs_load(nv_core_ctx_t *ctx);
+void nv_core_loadlibs_unload(nv_core_ctx_t *ctx);
+void nv_core_pubsub_cleanup(nv_core_ctx_t *ctx);
+
 #ifdef __cplusplus
 }
 #endif

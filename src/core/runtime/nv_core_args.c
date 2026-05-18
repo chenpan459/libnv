@@ -76,6 +76,11 @@ void nv_core_set_defaults(nv_core_ctx_t *ctx)
     ctx->telnet_bind_dup = NULL;
     ctx->cli_username_dup = NULL;
     ctx->cli_password_dup = NULL;
+    ctx->loadlibs = NULL;
+    ctx->loadlibs_loaded = 0;
+    ctx->pubsubs = NULL;
+    ctx->pubsub_inited = 0;
+    ctx->pubsub_next_id = 0;
 }
 
 void nv_core_cfg_set_str(char **slot, const char *val)
@@ -193,6 +198,10 @@ int nv_core_load_config(nv_core_ctx_t *ctx)
         return NV_OK;
     }
     ctx->ini = ini;
+
+    if (nv_core_loadlibs_parse_config(ctx) != NV_OK) {
+        return NV_ERROR;
+    }
 
     if (nv_ini_has_key(ini, "main", "daemon")) {
         ctx->opts.daemon = nv_ini_get_bool(ini, "main", "daemon", ctx->opts.daemon);

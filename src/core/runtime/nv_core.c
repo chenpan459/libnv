@@ -54,7 +54,7 @@ int nv_core_business_init(nv_core_ctx_t *ctx)
         return NV_ERROR;
     }
 
-    ctx->msg_queue = nv_init_message_queue(ctx->opts.mq_name, 64, MAX_MSG_SIZE, 0);
+    ctx->msg_queue = nv_init_message_queue(ctx->opts.mq_name, 10, MAX_MSG_SIZE, 0);
     if (!ctx->msg_queue) {
         nv_log_warning("message queue init skipped: %s", ctx->opts.mq_name);
     }

@@ -2,6 +2,7 @@
 
 file(GLOB_RECURSE NV_SOURCES CONFIGURE_DEPENDS "${CMAKE_CURRENT_SOURCE_DIR}/*.c")
 file(GLOB_RECURSE NV_HEADERS CONFIGURE_DEPENDS "${CMAKE_CURRENT_SOURCE_DIR}/*.h")
+list(FILTER NV_SOURCES EXCLUDE REGEX "/module/")
 
 set(NV_CJSON_DIR "${CMAKE_SOURCE_DIR}/third_party/cjson")
 list(APPEND NV_SOURCES "${NV_CJSON_DIR}/cJSON.c")
@@ -103,4 +104,22 @@ foreach(_tgt IN LISTS _nv_lib_targets)
         target_link_libraries(${_tgt} PUBLIC ${LIBUSB_LIBRARIES})
         target_include_directories(${_tgt} PUBLIC ${LIBUSB_INCLUDE_DIRS})
     endif()
+endforeach()
+
+set(NV_LOADLIB_TEST_MODULES
+    loadlib_alpha
+    loadlib_beta
+)
+
+foreach(_mod IN LISTS NV_LOADLIB_TEST_MODULES)
+    add_library(${_mod} SHARED
+        "${CMAKE_CURRENT_SOURCE_DIR}/module/${_mod}/${_mod}.c"
+    )
+    set_target_properties(${_mod} PROPERTIES
+        OUTPUT_NAME "nv_${_mod}"
+        PREFIX "lib"
+    )
+    target_link_libraries(${_mod} PRIVATE nv_shared)
+    target_compile_options(${_mod} PRIVATE -Wall -Wextra)
+    target_compile_definitions(${_mod} PRIVATE _GNU_SOURCE)
 endforeach()

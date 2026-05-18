@@ -230,6 +230,10 @@ int nv_core_startup_init(nv_core_ctx_t *ctx)
         return NV_ERROR;
     }
 
+    if (nv_core_loadlibs_load(ctx) != NV_OK) {
+        return NV_ERROR;
+    }
+
     if (nv_base_init(&ctx->conf) != NV_OK) {
         nv_log_error("core init failed");
         return NV_ERROR;

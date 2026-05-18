@@ -136,6 +136,8 @@ void nv_core_shutdown(nv_core_ctx_t *ctx)
 
     nv_loop_stop(&ctx->loop);
     nv_base_cleanup();
+    nv_core_loadlibs_unload(ctx);
+    nv_core_pubsub_cleanup(ctx);
 
     nv_core_pidfile_remove(ctx);
     nv_core_instance_lock_release(ctx->instance_lock_fd, ctx->opts.instance_lock);

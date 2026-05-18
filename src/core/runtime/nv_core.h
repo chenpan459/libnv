@@ -22,10 +22,14 @@ extern "C" {
 #include <nv_thread_pool.h>
 #include <nv_message_queue.h>
 #include <nv_ini.h>
+#include <pthread.h>
 #include <time.h>
 
 /* systemd notify：-1 自动检测 NOTIFY_SOCKET */
 #define NV_CORE_SYSTEMD_AUTO  (-1)
+
+#define NV_CORE_LOADLIB_INIT_SYMBOL     "nv_loadlib_init"
+#define NV_CORE_LOADLIB_CLEANUP_SYMBOL  "nv_loadlib_cleanup"
 
 /* 默认路径 */
 #define NV_CORE_DEFAULT_CONFIG      "/etc/nv/nv.conf"
@@ -77,8 +81,33 @@ typedef struct nv_core_opts_s {
     int         version;
 } nv_core_opts_t;
 
+typedef struct nv_core_ctx_s nv_core_ctx_t;
+typedef struct nv_core_pubsub_s nv_core_pubsub_t;
+
+typedef int  (*nv_core_loadlib_init_pt)(nv_core_ctx_t *ctx, const char *args);
+typedef void (*nv_core_loadlib_cleanup_pt)(nv_core_ctx_t *ctx);
+typedef void (*nv_core_pubsub_handler_pt)(nv_core_ctx_t *ctx,
+                                          const char *topic,
+                                          const void *data,
+                                          size_t len,
+                                          void *user_data);
+
+typedef struct nv_core_loadlib_s {
+    char                         *path;
+    char                         *args;
+    void                         *handle;
+    nv_core_loadlib_init_pt       init;
+    nv_core_loadlib_cleanup_pt    cleanup;
+    nv_core_ctx_t                *ctx;
+    pthread_t                     thread;
+    int                           thread_started;
+    int                           thread_exited;
+    int                           init_rc;
+    struct nv_core_loadlib_s     *next;
+} nv_core_loadlib_t;
+
 /* 主进程上下文 */
-typedef struct nv_core_ctx_s {
+struct nv_core_ctx_s {
     nv_core_opts_t   opts;
     nv_conf_t        conf;
     nv_core_phase_t  phase;
@@ -120,9 +149,16 @@ typedef struct nv_core_ctx_s {
     char            *telnet_bind_dup;
     char            *cli_username_dup;
     char            *cli_password_dup;
+    nv_core_loadlib_t *loadlibs;
+    int              loadlibs_loaded;
+    nv_core_pubsub_t *pubsubs;
+    pthread_mutex_t  pubsub_mutex;
+    pthread_cond_t   pubsub_cond;
+    int              pubsub_inited;
+    unsigned long    pubsub_next_id;
 
     void            *user_data;
-} nv_core_ctx_t;
+};
 
 /* 业务扩展钩子 */
 typedef struct nv_core_hooks_s {
@@ -159,6 +195,14 @@ int  nv_core_run(nv_core_ctx_t *ctx, int argc, char **argv,
 /* 运行时 */
 int  nv_core_request_quit(nv_core_ctx_t *ctx);
 int  nv_core_is_quitting(const nv_core_ctx_t *ctx);
+
+/* 动态业务模块通信：进程内发布/订阅 */
+int  nv_core_pubsub_subscribe(nv_core_ctx_t *ctx, const char *topic,
+                              nv_core_pubsub_handler_pt handler,
+                              void *user_data, void **sub_handle);
+int  nv_core_pubsub_unsubscribe(nv_core_ctx_t *ctx, void *sub_handle);
+int  nv_core_pubsub_publish(nv_core_ctx_t *ctx, const char *topic,
+                            const void *data, size_t len);
 
 /* 工具 */
 const char *nv_core_phase_name(nv_core_phase_t phase);
