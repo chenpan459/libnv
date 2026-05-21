@@ -47,12 +47,18 @@ option(NV_BUILD_EXAMPLES  "Build examples (部分示例待修复)"        OFF)
 option(NV_BUILD_TESTS         "Build unit tests"                    ON)
 option(NV_BUILD_TESTS_LEGACY  "Build legacy network/arp tests"      OFF)
 option(NV_ENABLE_FEATURE "Enable ENABLE_FEATURE compile define"   ON)
+option(NV_EMBEDDED_PROFILE "Embedded product preset (small, -Os, less deps)" OFF)
+
+include("${CMAKE_SOURCE_DIR}/cmake/EmbeddedProfile.cmake")
 
 if(NV_ENABLE_FEATURE)
     set(NV_COMPILE_DEFS ENABLE_FEATURE)
 endif()
 
 find_package(Threads REQUIRED)
+
+# 第三方库（cjson / mxml / sqlite）独立编译
+add_subdirectory(third_party)
 
 # 核心库
 add_subdirectory(src)
@@ -87,6 +93,8 @@ install(TARGETS nv_shared
 if(NV_BUILD_STATIC)
     install(TARGETS nv_static ARCHIVE DESTINATION ${CMAKE_INSTALL_LIBDIR})
 endif()
+install(TARGETS ${NV_THIRD_PARTY_LIBS} ARCHIVE DESTINATION ${CMAKE_INSTALL_LIBDIR})
+install(TARGETS ${NV_THIRD_PARTY_LIBS_SHARED} LIBRARY DESTINATION ${CMAKE_INSTALL_LIBDIR})
 install(DIRECTORY src/ DESTINATION ${CMAKE_INSTALL_INCLUDEDIR}/nv
     FILES_MATCHING PATTERN "*.h"
 )
@@ -97,6 +105,7 @@ message(STATUS "  Build type:     ${CMAKE_BUILD_TYPE}")
 message(STATUS "  Install prefix: ${CMAKE_INSTALL_PREFIX}")
 message(STATUS "  NV_ENABLE_USB:  ${NV_ENABLE_USB}")
 message(STATUS "  NV_ENABLE_SQLITE:${NV_ENABLE_SQLITE}")
+message(STATUS "  NV_EMBEDDED_PROFILE:${NV_EMBEDDED_PROFILE}")
 message(STATUS "  NV_BUILD_APP:   ${NV_BUILD_APP}")
 message(STATUS "  NV_BUILD_TESTS: ${NV_BUILD_TESTS}")
 message(STATUS "  Build dir:      ${CMAKE_BINARY_DIR}")

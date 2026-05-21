@@ -40,6 +40,9 @@ extern "C" {
 #define NV_CORE_DEFAULT_PUBSUB_SOCKET "/tmp/nv_pubsub.sock"
 #define NV_CORE_DEFAULT_TELNET_PORT   2323
 #define NV_CORE_DEFAULT_TELNET_BIND "127.0.0.1"
+#define NV_CORE_DEFAULT_LOADLIB_DIR     "/usr/lib/nv/plugins"
+#define NV_CORE_DEFAULT_TOMBSTONE_FILE  "/var/log/nv.tombstone"
+#define NV_CORE_DEFAULT_METRICS_TOPIC   "nv/metrics"
 
 /* 主进程运行阶段 */
 typedef enum {
@@ -79,6 +82,16 @@ typedef struct nv_core_opts_s {
     const char *telnet_bind;
     const char *cli_username;
     const char *cli_password;
+    const char *loadlib_dir;           /* 插件目录白名单 */
+    int         loadlib_allow_absolute; /* 1=允许绝对路径（开发用） */
+    const char *tombstone_file;        /* 崩溃摘要文件 */
+    int         watchdog_enable;
+    const char *watchdog_device;       /* 如 /dev/watchdog */
+    const char *watchdog_cmd;          /* 自定义喂狗 shell 命令 */
+    int         log_rotate_max_mb;     /* 0=不轮转 */
+    int         log_rotate_keep;       /* 保留份数 */
+    int         metrics_publish;       /* 心跳时 pubsub 发布指标 */
+    const char *metrics_topic;
     int         help;
     int         version;
 } nv_core_opts_t;
@@ -157,6 +170,11 @@ struct nv_core_ctx_s {
     char            *telnet_bind_dup;
     char            *cli_username_dup;
     char            *cli_password_dup;
+    char            *loadlib_dir_dup;
+    char            *tombstone_file_dup;
+    char            *watchdog_device_dup;
+    char            *watchdog_cmd_dup;
+    char            *metrics_topic_dup;
     nv_core_loadlib_t *loadlibs;
     int              loadlibs_loaded;
     nv_core_pubsub_t *pubsubs;
@@ -179,6 +197,8 @@ typedef struct nv_core_hooks_s {
     void (*on_business_cleanup)(nv_core_ctx_t *ctx);
     void (*on_reload)(nv_core_ctx_t *ctx);
     void (*on_idle)(nv_core_ctx_t *ctx);
+    /** SIGUSR1 重启前调用；返回非 NV_OK 则取消 re-exec（OTA 准备窗口） */
+    int  (*on_before_restart)(nv_core_ctx_t *ctx);
 } nv_core_hooks_t;
 
 /* ---------- 1. 启动初始化 ---------- */
@@ -200,6 +220,9 @@ void nv_core_shutdown(nv_core_ctx_t *ctx);
 void nv_core_exception_init(void);
 void nv_core_exception_handler(int signum);
 void nv_core_handle_fatal(nv_core_ctx_t *ctx);
+void nv_core_write_tombstone(nv_core_ctx_t *ctx, int signum);
+int  nv_core_feed_watchdog(nv_core_ctx_t *ctx);
+int  nv_core_publish_metrics(nv_core_ctx_t *ctx);
 
 /* ---------- 统一入口 ---------- */
 int  nv_core_run(nv_core_ctx_t *ctx, int argc, char **argv,

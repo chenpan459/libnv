@@ -24,8 +24,8 @@ void nv_core_set_defaults(nv_core_ctx_t *ctx)
     ctx->opts.foreground  = 0;
     ctx->opts.use_syslog  = 0;
     ctx->opts.log_level   = NV_LOG_LEVEL_INFO;
-    ctx->opts.worker_threads          = 4;
-    ctx->opts.worker_connections      = 1024;
+    ctx->opts.worker_threads          = 1;
+    ctx->opts.worker_connections      = 128;
     ctx->opts.heartbeat_interval_sec  = 60;
     ctx->opts.shutdown_timeout_sec    = 30;
     ctx->opts.systemd_notify          = NV_CORE_SYSTEMD_AUTO;
@@ -36,11 +36,21 @@ void nv_core_set_defaults(nv_core_ctx_t *ctx)
     ctx->opts.ctl_socket              = NV_CORE_DEFAULT_CTL_SOCKET;
     ctx->opts.pubsub_socket           = NV_CORE_DEFAULT_PUBSUB_SOCKET;
     ctx->opts.instance_lock           = NV_CORE_DEFAULT_LOCK_NAME;
-    ctx->opts.telnet_enable           = 1;
+    ctx->opts.telnet_enable           = 0;
     ctx->opts.telnet_port             = NV_CORE_DEFAULT_TELNET_PORT;
     ctx->opts.telnet_bind             = NV_CORE_DEFAULT_TELNET_BIND;
     ctx->opts.cli_username            = "admin";
-    ctx->opts.cli_password            = "nvadmin";
+    ctx->opts.cli_password            = "";
+    ctx->opts.loadlib_dir              = NV_CORE_DEFAULT_LOADLIB_DIR;
+    ctx->opts.loadlib_allow_absolute    = 0;
+    ctx->opts.tombstone_file            = NV_CORE_DEFAULT_TOMBSTONE_FILE;
+    ctx->opts.watchdog_enable           = 0;
+    ctx->opts.watchdog_device            = "/dev/watchdog";
+    ctx->opts.watchdog_cmd              = "";
+    ctx->opts.log_rotate_max_mb          = 4;
+    ctx->opts.log_rotate_keep            = 3;
+    ctx->opts.metrics_publish            = 0;
+    ctx->opts.metrics_topic              = NV_CORE_DEFAULT_METRICS_TOPIC;
 
     memset(&ctx->conf, 0, sizeof(ctx->conf));
     ctx->conf.daemon             = 0;
@@ -78,6 +88,11 @@ void nv_core_set_defaults(nv_core_ctx_t *ctx)
     ctx->telnet_bind_dup = NULL;
     ctx->cli_username_dup = NULL;
     ctx->cli_password_dup = NULL;
+    ctx->loadlib_dir_dup = NULL;
+    ctx->tombstone_file_dup = NULL;
+    ctx->watchdog_device_dup = NULL;
+    ctx->watchdog_cmd_dup = NULL;
+    ctx->metrics_topic_dup = NULL;
     ctx->loadlibs = NULL;
     ctx->loadlibs_loaded = 0;
     ctx->pubsubs = NULL;
@@ -204,6 +219,21 @@ int nv_core_load_config(nv_core_ctx_t *ctx)
         return NV_OK;
     }
     ctx->ini = ini;
+
+    /* [loadlib] 须在解析顶层 loadlib 指令之前加载 */
+    str = nv_ini_get_string(ini, "loadlib", "plugin_dir", NULL);
+    if (!str) {
+        str = nv_ini_get_string(ini, "loadlib", "dir", NULL);
+    }
+    if (str) {
+        nv_core_cfg_set_str(&ctx->loadlib_dir_dup, str);
+        ctx->opts.loadlib_dir = ctx->loadlib_dir_dup;
+    }
+    if (nv_ini_has_key(ini, "loadlib", "allow_absolute")) {
+        ctx->opts.loadlib_allow_absolute =
+            nv_ini_get_bool(ini, "loadlib", "allow_absolute",
+                            ctx->opts.loadlib_allow_absolute);
+    }
 
     if (nv_core_loadlibs_parse_config(ctx) != NV_OK) {
         return NV_ERROR;
@@ -355,6 +385,53 @@ int nv_core_load_config(nv_core_ctx_t *ctx)
     if (str) {
         nv_core_cfg_set_str(&ctx->cli_password_dup, str);
         ctx->opts.cli_password = ctx->cli_password_dup;
+    }
+
+    str = nv_ini_get_string(ini, "daemon", "tombstone_file", NULL);
+    if (str) {
+        nv_core_cfg_set_str(&ctx->tombstone_file_dup, str);
+        ctx->opts.tombstone_file = ctx->tombstone_file_dup;
+    }
+
+    if (nv_ini_has_key(ini, "watchdog", "enable")) {
+        ctx->opts.watchdog_enable =
+            nv_ini_get_bool(ini, "watchdog", "enable", ctx->opts.watchdog_enable);
+    }
+    str = nv_ini_get_string(ini, "watchdog", "device", NULL);
+    if (str) {
+        nv_core_cfg_set_str(&ctx->watchdog_device_dup, str);
+        ctx->opts.watchdog_device = ctx->watchdog_device_dup;
+    }
+    str = nv_ini_get_string(ini, "watchdog", "cmd", NULL);
+    if (str) {
+        nv_core_cfg_set_str(&ctx->watchdog_cmd_dup, str);
+        ctx->opts.watchdog_cmd = ctx->watchdog_cmd_dup;
+    }
+
+    if (nv_ini_has_key(ini, "log", "rotate_max_mb")) {
+        ctx->opts.log_rotate_max_mb =
+            nv_ini_get_int(ini, "log", "rotate_max_mb", ctx->opts.log_rotate_max_mb);
+    }
+    if (nv_ini_has_key(ini, "log", "rotate_keep")) {
+        ctx->opts.log_rotate_keep =
+            nv_ini_get_int(ini, "log", "rotate_keep", ctx->opts.log_rotate_keep);
+    }
+    if (ctx->opts.log_rotate_max_mb > 0 && ctx->opts.log_rotate_keep < 1) {
+        ctx->opts.log_rotate_keep = 1;
+    }
+    if (ctx->opts.log_rotate_max_mb > 0) {
+        nv_log_set_rotate((size_t)ctx->opts.log_rotate_max_mb * 1024U * 1024U,
+                          ctx->opts.log_rotate_keep);
+    }
+
+    if (nv_ini_has_key(ini, "metrics", "publish")) {
+        ctx->opts.metrics_publish =
+            nv_ini_get_bool(ini, "metrics", "publish", ctx->opts.metrics_publish);
+    }
+    str = nv_ini_get_string(ini, "metrics", "topic", NULL);
+    if (str) {
+        nv_core_cfg_set_str(&ctx->metrics_topic_dup, str);
+        ctx->opts.metrics_topic = ctx->metrics_topic_dup;
     }
 
     ctx->conf.daemon             = ctx->opts.daemon;

@@ -8,6 +8,8 @@
 #include <sys/time.h>
 #include <sys/syscall.h>
 #include <unistd.h>
+#include <sys/stat.h>
+#include <errno.h>
 
 #define NV_LOG_MSG_MAX  NV_LOG_LINE_MAX
 
@@ -48,6 +50,9 @@ static size_t              g_ring_capacity   = NV_LOG_QUEUE_DEFAULT;
 static nv_log_overflow_e   g_overflow_policy = NV_LOG_OVERFLOW_DROP;
 static _Atomic uint64_t    g_dropped         = 0;
 static _Atomic int         g_async_ready     = 0;
+static size_t              g_rotate_max_bytes = 0;
+static int                 g_rotate_keep      = 0;
+static char                g_rotate_path[512];
 
 static long nv_log_get_tid(void)
 {
@@ -275,11 +280,58 @@ static int nv_log_open_default_file(void)
     return 0;
 }
 
+void nv_log_set_rotate(size_t max_bytes, int keep_files)
+{
+    g_rotate_max_bytes = max_bytes;
+    g_rotate_keep      = keep_files > 0 ? keep_files : 1;
+}
+
+static void nv_log_remember_path(const char *path)
+{
+    if (!path || !path[0]) {
+        g_rotate_path[0] = '\0';
+        return;
+    }
+    snprintf(g_rotate_path, sizeof(g_rotate_path), "%s", path);
+}
+
+static void nv_log_rotate_if_needed(void)
+{
+    struct stat st;
+    char        oldpath[560];
+    char        newpath[560];
+    int         i;
+
+    if (g_rotate_max_bytes == 0 || g_rotate_path[0] == '\0' || !g_log_file) {
+        return;
+    }
+    if (stat(g_rotate_path, &st) != 0 || (size_t)st.st_size < g_rotate_max_bytes) {
+        return;
+    }
+
+    fflush(g_log_file);
+    fclose(g_log_file);
+    g_log_file = NULL;
+
+    snprintf(oldpath, sizeof(oldpath), "%s.%d", g_rotate_path, g_rotate_keep);
+    remove(oldpath);
+    for (i = g_rotate_keep - 1; i >= 1; i--) {
+        snprintf(oldpath, sizeof(oldpath), "%s.%d", g_rotate_path, i);
+        snprintf(newpath, sizeof(newpath), "%s.%d", g_rotate_path, i + 1);
+        rename(oldpath, newpath);
+    }
+    snprintf(newpath, sizeof(newpath), "%s.1", g_rotate_path);
+    rename(g_rotate_path, newpath);
+
+    g_log_file = fopen(g_rotate_path, "a");
+}
+
 static void nv_log_ensure_file_consumer(void)
 {
     if (g_log_file == NULL) {
         nv_log_open_default_file();
     }
+    nv_log_rotate_if_needed();
 }
 
 static void nv_log_write_msg(const nv_log_slot_t *slot)
@@ -602,6 +654,7 @@ int nv_log_init_file(const char *path)
         fclose(g_log_file);
     }
     g_log_file = fp;
+    nv_log_remember_path(path);
     return 0;
 }
 

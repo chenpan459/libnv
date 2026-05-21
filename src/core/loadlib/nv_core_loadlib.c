@@ -11,6 +11,7 @@
 #include <stdlib.h>
 #include <string.h>
 #include <unistd.h>
+#include <limits.h>
 
 static char *nv_loadlib_trim(char *s)
 {
@@ -116,18 +117,81 @@ static void nv_core_loadlibs_free_list(nv_core_loadlib_t *lib)
     }
 }
 
+static int nv_loadlib_path_is_under_dir(const char *path, const char *dir)
+{
+    size_t len;
+
+    if (!path || !dir || !dir[0]) {
+        return 0;
+    }
+    len = strlen(dir);
+    if (strncmp(path, dir, len) != 0) {
+        return 0;
+    }
+    return (path[len] == '\0' || path[len] == '/');
+}
+
+static char *nv_core_loadlib_resolve_path(nv_core_ctx_t *ctx, const char *path)
+{
+    char  joined[PATH_MAX];
+    char *out;
+
+    if (!ctx || !path || !path[0]) {
+        return NULL;
+    }
+    if (strstr(path, "..") != NULL) {
+        return NULL;
+    }
+
+    if (path[0] == '/') {
+        if (!ctx->opts.loadlib_allow_absolute) {
+            nv_log_error("loadlib: absolute path denied: %s", path);
+            return NULL;
+        }
+        if (ctx->opts.loadlib_dir && ctx->opts.loadlib_dir[0] &&
+            !nv_loadlib_path_is_under_dir(path, ctx->opts.loadlib_dir)) {
+            nv_log_error("loadlib: path outside plugin_dir: %s", path);
+            return NULL;
+        }
+        return strdup(path);
+    }
+
+    if (strchr(path, '/') != NULL) {
+        if (!ctx->opts.loadlib_allow_absolute) {
+            nv_log_error("loadlib: relative path with '/' denied: %s", path);
+            return NULL;
+        }
+        return strdup(path);
+    }
+
+    if (!ctx->opts.loadlib_dir || !ctx->opts.loadlib_dir[0]) {
+        return strdup(path);
+    }
+
+    snprintf(joined, sizeof(joined), "%s/%s", ctx->opts.loadlib_dir, path);
+    out = strdup(joined);
+    return out;
+}
+
 static int nv_core_loadlibs_append(nv_core_ctx_t *ctx, const char *path,
                                    const char *args)
 {
     nv_core_loadlib_t *lib;
     nv_core_loadlib_t **tail;
+    char              *resolved;
 
-    lib = (nv_core_loadlib_t *)calloc(1, sizeof(*lib));
-    if (!lib) {
+    resolved = nv_core_loadlib_resolve_path(ctx, path);
+    if (!resolved) {
         return NV_ERROR;
     }
 
-    lib->path = strdup(path);
+    lib = (nv_core_loadlib_t *)calloc(1, sizeof(*lib));
+    if (!lib) {
+        free(resolved);
+        return NV_ERROR;
+    }
+
+    lib->path = resolved;
     lib->args = strdup(args ? args : "");
     if (!lib->path || !lib->args) {
         free(lib->path);

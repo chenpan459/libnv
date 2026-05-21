@@ -2,6 +2,7 @@
  * nv_core_startup.c - 启动、PID、信号、资源限制
  ***********************************************/
 #include "nv_core_private.h"
+#include "nv_core_health.h"
 #include "nv_core_config.h"
 #include "nv_core_lock.h"
 #include "nv_version.h"
@@ -273,6 +274,7 @@ void nv_core_handle_fatal(nv_core_ctx_t *ctx)
     signum = (int)ctx->fatal_signum;
     ctx->phase = NV_CORE_PHASE_EXCEPTION;
 
+    nv_core_write_tombstone(ctx, signum);
     nv_log_fatal("fatal signal caught: %d (%s)", signum, strsignal(signum));
 
     ctx->fatal_signum = 0;

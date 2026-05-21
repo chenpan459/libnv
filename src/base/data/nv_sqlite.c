@@ -13,6 +13,26 @@ static int nv_sqlite_map_rc(int rc)
     return NV_ERROR;
 }
 
+static int nv_sqlite_apply_embedded_pragmas(nv_sqlite_t *db)
+{
+    if (db == NULL) {
+        return NV_ERROR;
+    }
+    if (nv_sqlite_exec(db, "PRAGMA journal_mode=WAL;") != NV_OK) {
+        return NV_ERROR;
+    }
+    if (nv_sqlite_exec(db, "PRAGMA synchronous=NORMAL;") != NV_OK) {
+        return NV_ERROR;
+    }
+    if (nv_sqlite_exec(db, "PRAGMA cache_size=-2000;") != NV_OK) {
+        return NV_ERROR;
+    }
+    if (nv_sqlite_exec(db, "PRAGMA temp_store=MEMORY;") != NV_OK) {
+        return NV_ERROR;
+    }
+    return NV_OK;
+}
+
 int nv_sqlite_open(const char *path, nv_sqlite_t **db)
 {
     int rc;
@@ -23,6 +43,14 @@ int nv_sqlite_open(const char *path, nv_sqlite_t **db)
     *db = NULL;
     rc = sqlite3_open(path, db);
     return nv_sqlite_map_rc(rc);
+}
+
+int nv_sqlite_open_embedded(const char *path, nv_sqlite_t **db)
+{
+    if (nv_sqlite_open(path, db) != NV_OK) {
+        return NV_ERROR;
+    }
+    return nv_sqlite_apply_embedded_pragmas(*db);
 }
 
 int nv_sqlite_open_memory(nv_sqlite_t **db)

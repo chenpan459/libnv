@@ -7,6 +7,7 @@
 
 #include <nv_event.h>
 #include <nv_log.h>
+#include <nv_watchdog.h>
 
 #include <stdio.h>
 #include <stddef.h>
@@ -14,6 +15,7 @@
 #include <string.h>
 #include <unistd.h>
 #include <time.h>
+#include <signal.h>
 #include <sys/socket.h>
 #include <sys/un.h>
 
@@ -115,6 +117,9 @@ static void nv_core_heartbeat_handler(nv_loop_t *loop, void *ev, void *data)
         nv_core_systemd_notify("WATCHDOG=1");
     }
 
+    nv_core_feed_watchdog(ctx);
+    nv_core_publish_metrics(ctx);
+
     if (ctx->opts.heartbeat_interval_sec > 0) {
         unsigned long ms = (unsigned long)ctx->opts.heartbeat_interval_sec * 1000UL;
         nv_loop_add_timer(&ctx->loop, tev, ms);
@@ -138,6 +143,14 @@ int nv_core_health_init(nv_core_ctx_t *ctx)
     if (g_systemd_notify) {
         nv_core_systemd_notify("READY=1");
         nv_log_info("systemd notify enabled (READY)");
+    }
+
+    if (ctx->opts.watchdog_enable) {
+        if (ctx->opts.watchdog_device && ctx->opts.watchdog_device[0]) {
+            if (nv_watchdog_open(ctx->opts.watchdog_device) != NV_OK) {
+                nv_log_warning("watchdog open failed: %s", ctx->opts.watchdog_device);
+            }
+        }
     }
 
     if (ctx->opts.heartbeat_interval_sec > 0) {
@@ -173,6 +186,73 @@ void nv_core_health_cleanup(nv_core_ctx_t *ctx)
         nv_loop_del_timer(&ctx->loop, &ctx->heartbeat_ev);
     }
 
+    nv_watchdog_close();
     ctx->health_inited = 0;
     g_systemd_notify   = 0;
+}
+
+int nv_core_feed_watchdog(nv_core_ctx_t *ctx)
+{
+    if (!ctx || !ctx->opts.watchdog_enable) {
+        return NV_DECLINED;
+    }
+    if (ctx->opts.watchdog_cmd && ctx->opts.watchdog_cmd[0]) {
+        return nv_watchdog_feed_cmd(ctx->opts.watchdog_cmd);
+    }
+    return nv_watchdog_feed();
+}
+
+int nv_core_publish_metrics(nv_core_ctx_t *ctx)
+{
+    nv_core_runtime_stats_t st;
+    nv_log_queue_stats_t    lqs;
+    char                    buf[640];
+    int                     n;
+
+    if (!ctx || !ctx->opts.metrics_publish || !ctx->pubsub_inited) {
+        return NV_DECLINED;
+    }
+    if (!ctx->opts.metrics_topic || !ctx->opts.metrics_topic[0]) {
+        return NV_DECLINED;
+    }
+
+    nv_core_get_runtime_stats(ctx, &st);
+    nv_log_get_queue_stats(&lqs);
+
+    n = snprintf(buf, sizeof(buf),
+                 "{\"uptime\":%lu,\"loop_events\":%lu,\"loop_timers\":%lu,"
+                 "\"log_pending\":%zu,\"log_dropped\":%llu,\"quitting\":%d}",
+                 st.uptime_sec, st.loop_events, st.loop_timers,
+                 lqs.pending, (unsigned long long)lqs.dropped, st.quitting);
+    if (n <= 0 || (size_t)n >= sizeof(buf)) {
+        return NV_ERROR;
+    }
+    return nv_core_pubsub_publish(ctx, ctx->opts.metrics_topic, buf, (size_t)n);
+}
+
+void nv_core_write_tombstone(nv_core_ctx_t *ctx, int signum)
+{
+    FILE                   *fp;
+    nv_core_runtime_stats_t st;
+    const char             *path;
+
+    if (!ctx) {
+        return;
+    }
+    path = ctx->opts.tombstone_file;
+    if (!path || !path[0]) {
+        path = NV_CORE_DEFAULT_TOMBSTONE_FILE;
+    }
+
+    fp = fopen(path, "a");
+    if (!fp) {
+        return;
+    }
+
+    nv_core_get_runtime_stats(ctx, &st);
+    fprintf(fp,
+            "--- nv tombstone pid=%d signum=%d (%s) phase=%s uptime=%lu ---\n",
+            (int)getpid(), signum, strsignal(signum),
+            nv_core_phase_name(ctx->phase), st.uptime_sec);
+    fclose(fp);
 }

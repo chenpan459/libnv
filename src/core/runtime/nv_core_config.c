@@ -61,7 +61,7 @@ int nv_core_config_validate(nv_core_ctx_t *ctx)
         return NV_ERROR;
     }
 
-    if (ctx->opts.worker_connections < 16 || ctx->opts.worker_connections > 65536) {
+    if (ctx->opts.worker_connections < 8 || ctx->opts.worker_connections > 65536) {
         nv_log_error("config validate: worker connections out of range");
         return NV_ERROR;
     }

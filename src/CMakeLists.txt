@@ -4,43 +4,18 @@ file(GLOB_RECURSE NV_SOURCES CONFIGURE_DEPENDS "${CMAKE_CURRENT_SOURCE_DIR}/*.c"
 file(GLOB_RECURSE NV_HEADERS CONFIGURE_DEPENDS "${CMAKE_CURRENT_SOURCE_DIR}/*.h")
 list(FILTER NV_SOURCES EXCLUDE REGEX "/module/")
 
-set(NV_CJSON_DIR "${CMAKE_SOURCE_DIR}/third_party/cjson")
-list(APPEND NV_SOURCES "${NV_CJSON_DIR}/cJSON.c")
-
-set(NV_MXML_DIR "${CMAKE_SOURCE_DIR}/third_party/mxml")
-file(GLOB NV_MXML_SOURCES "${NV_MXML_DIR}/mxml-*.c")
-list(APPEND NV_SOURCES ${NV_MXML_SOURCES})
-# 第三方 mxml 含刻意 fallthrough 的 switch，屏蔽该告警
-set_source_files_properties(${NV_MXML_SOURCES} PROPERTIES
-    COMPILE_OPTIONS "-Wno-implicit-fallthrough"
-)
-
-set(NV_INCLUDE_DIRS "${CMAKE_CURRENT_SOURCE_DIR}" "${NV_CJSON_DIR}" "${NV_MXML_DIR}")
-
-# SQLite（可选，内嵌 amalgamation）
-if(NV_ENABLE_SQLITE)
-    set(NV_SQLITE_DIR "${CMAKE_SOURCE_DIR}/third_party/sqlite")
-    list(APPEND NV_SOURCES "${NV_SQLITE_DIR}/sqlite3.c")
-    list(APPEND NV_INCLUDE_DIRS "${NV_SQLITE_DIR}")
-    set(NV_SQLITE_DEFS
-        NV_HAVE_SQLITE=1
-        SQLITE_THREADSAFE=1
-        SQLITE_OMIT_LOAD_EXTENSION
-    )
-    # 第三方 amalgamation 含刻意 fallthrough 的 switch，屏蔽该告警
-    set_source_files_properties("${NV_SQLITE_DIR}/sqlite3.c" PROPERTIES
-        COMPILE_OPTIONS "-Wno-implicit-fallthrough"
-    )
-    message(STATUS "SQLite enabled (vendored amalgamation)")
-else()
-    message(STATUS "NV_ENABLE_SQLITE=OFF, excluding nv_sqlite.c")
-    list(FILTER NV_SOURCES EXCLUDE REGEX "/nv_sqlite\\.c$")
-endif()
+set(NV_INCLUDE_DIRS "${CMAKE_CURRENT_SOURCE_DIR}")
 foreach(_hdr IN LISTS NV_HEADERS)
     get_filename_component(_dir "${_hdr}" DIRECTORY)
     list(APPEND NV_INCLUDE_DIRS "${_dir}")
 endforeach()
 list(REMOVE_DUPLICATES NV_INCLUDE_DIRS)
+
+# SQLite 封装层（无第三方 sqlite 库时不编译 nv_sqlite.c）
+if(NOT NV_ENABLE_SQLITE)
+    message(STATUS "NV_ENABLE_SQLITE=OFF, excluding nv_sqlite.c")
+    list(FILTER NV_SOURCES EXCLUDE REGEX "/nv_sqlite\\.c$")
+endif()
 
 # USB 模块（可选）
 if(NV_ENABLE_USB)
@@ -66,7 +41,6 @@ if(NV_BUILD_STATIC)
     add_library(nv_static STATIC ${NV_SOURCES})
 endif()
 
-# 中间文件(.o)由 CMake 生成在 build/src/CMakeFiles/...，不会写入源码目录
 set_target_properties(nv_shared PROPERTIES
     OUTPUT_NAME nv
     VERSION   ${PROJECT_VERSION}
@@ -89,17 +63,28 @@ foreach(_tgt IN LISTS _nv_lib_targets)
     if(NV_COMPILE_DEFS)
         target_compile_definitions(${_tgt} PRIVATE ${NV_COMPILE_DEFS})
     endif()
-    if(NV_ENABLE_SQLITE AND NV_SQLITE_DEFS)
-        target_compile_definitions(${_tgt} PRIVATE ${NV_SQLITE_DEFS})
-    endif()
     target_compile_options(${_tgt} PRIVATE -Wall -Wextra)
-    target_link_libraries(${_tgt}
-        PUBLIC
-            Threads::Threads
-            m
-            dl
-            rt
-    )
+
+    if(_tgt STREQUAL "nv_shared")
+        target_link_libraries(${_tgt}
+            PUBLIC
+                ${NV_THIRD_PARTY_LIBS_SHARED}
+                Threads::Threads
+                m
+                dl
+                rt
+        )
+    else()
+        target_link_libraries(${_tgt}
+            PUBLIC
+                ${NV_THIRD_PARTY_LIBS}
+                Threads::Threads
+                m
+                dl
+                rt
+        )
+    endif()
+
     if(LIBUSB_FOUND)
         target_link_libraries(${_tgt} PUBLIC ${LIBUSB_LIBRARIES})
         target_include_directories(${_tgt} PUBLIC ${LIBUSB_INCLUDE_DIRS})

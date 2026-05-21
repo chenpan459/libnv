@@ -85,6 +85,8 @@ void nv_core_idle_handler(nv_loop_t *loop, void *ev, void *data)
         return;
     }
 
+    nv_core_feed_watchdog(ctx);
+
     if (g_core_hooks && g_core_hooks->on_idle) {
         g_core_hooks->on_idle(ctx);
     }
@@ -158,6 +160,11 @@ void nv_core_shutdown(nv_core_ctx_t *ctx)
     free(ctx->telnet_bind_dup);
     free(ctx->cli_username_dup);
     free(ctx->cli_password_dup);
+    free(ctx->loadlib_dir_dup);
+    free(ctx->tombstone_file_dup);
+    free(ctx->watchdog_device_dup);
+    free(ctx->watchdog_cmd_dup);
+    free(ctx->metrics_topic_dup);
     ctx->pid_file_dup = NULL;
     ctx->log_file_dup = NULL;
     ctx->mq_name_dup  = NULL;
@@ -277,6 +284,11 @@ int nv_core_run(nv_core_ctx_t *ctx, int argc, char **argv,
     if (ctx->restart) {
         char *const *exec_argv;
 
+        if (hooks && hooks->on_before_restart &&
+            hooks->on_before_restart(ctx) != NV_OK) {
+            nv_log_warning("restart cancelled by on_before_restart hook");
+            ctx->restart = 0;
+        } else {
         nv_log_info("restart requested (SIGUSR1), re-exec");
         nv_core_shutdown(ctx);
         exec_argv = (char *const *)(g_saved_argv ? g_saved_argv : argv);
@@ -285,6 +297,7 @@ int nv_core_run(nv_core_ctx_t *ctx, int argc, char **argv,
         }
         nv_core_free_saved_argv();
         return NV_ERROR;
+        }
     }
 
     nv_log_info("main process exiting");

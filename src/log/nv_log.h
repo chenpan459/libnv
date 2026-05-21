@@ -74,6 +74,9 @@ typedef struct nv_log_queue_stats_s {
 
 void nv_log_get_queue_stats(nv_log_queue_stats_t *stats);
 
+/** 日志文件按大小轮转（须在 nv_log_init_file 之前或之后均可，写盘前检查） */
+void nv_log_set_rotate(size_t max_bytes, int keep_files);
+
 int  nv_log_init(void);
 int  nv_log_init_file(const char *path);
 int  nv_log_init_syslog(const char *ident);

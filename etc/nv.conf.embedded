@@ -1,0 +1,51 @@
+; libnv 嵌入式产品推荐配置（单进程、低开销、安全缺省）
+
+[main]
+daemon = true
+pid_file = /var/run/nv.pid
+
+[log]
+log_file = /var/log/nv.log
+log_level = info
+syslog = false
+console = false
+queue_size = 512
+overflow = drop
+rotate_max_mb = 2
+rotate_keep = 3
+
+[worker]
+threads = 1
+connections = 128
+processes = 0
+respawn = false
+
+[ipc]
+mq_name = /nv_mq
+pubsub_socket = /var/run/nv_pubsub.sock
+
+[daemon]
+heartbeat_interval = 60
+shutdown_timeout = 15
+systemd_notify = true
+max_open_files = 4096
+core_limit = 0
+ctl_socket = /var/run/nv.ctl.sock
+instance_lock = libnv
+tombstone_file = /var/log/nv.tombstone
+
+[cli]
+telnet_enable = false
+
+[loadlib]
+plugin_dir = /usr/lib/nv/plugins
+allow_absolute = false
+
+[watchdog]
+enable = true
+device = /dev/watchdog
+; cmd = /bin/sh -c 'echo 1 > /dev/watchdog'
+
+[metrics]
+publish = true
+topic = nv/metrics

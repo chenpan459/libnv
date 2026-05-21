@@ -95,6 +95,31 @@ nv_core_run(ctx, argc, argv, hooks)
 - **可扩展 CLI**：`NV_CORE_CLI_REGISTER` 宏注册子命令，Telnet/ctl 共用同一注册表。
 - **嵌入式友好**：第三方库 vendored，CMake 可选关闭 USB / SQLite。
 
+### 嵌入式量产能力（P0/P1/P2）
+
+| 能力 | 配置段 / API | 说明 |
+|------|----------------|------|
+| 嵌入式构建预设 | `NV_EMBEDDED_PROFILE=ON` 或 `./build.sh 1.0.0 embedded` | 关闭 SQLite/USB，Release 加 `-Os` |
+| 收紧默认参数 | `etc/nv.conf.embedded` | threads=1、connections=128、默认关 Telnet |
+| loadlib 白名单 | `[loadlib] plugin_dir` | 仅允许插件目录下 `.so`；`allow_absolute` 开发用 |
+| 看门狗 | `[watchdog]`、`nv_watchdog_*` | 心跳/idle 喂 `/dev/watchdog` 或自定义 `cmd` |
+| 日志轮转 | `[log] rotate_max_mb` | 按大小轮转，减轻 eMMC 写满风险 |
+| SQLite 嵌入式 | `nv_sqlite_open_embedded()` | WAL + synchronous=NORMAL |
+| 运行指标 pubsub | `[metrics] publish` | 心跳发布 JSON 到 `nv/metrics` 主题 |
+| OTA 窗口 | `hooks.on_before_restart` | SIGUSR1 re-exec 前回调，可取消重启 |
+| 崩溃摘要 | `[daemon] tombstone_file` | 致命信号时追加写入 tombstone |
+
+推荐量产配置：复制 `etc/nv.conf.embedded` 到 `/etc/nv/nv.conf`。
+
+### 模块体积参考（顺序量级）
+
+| 组件 | 约 Flash（Release） | 裁剪建议 |
+|------|---------------------|----------|
+| libnv 核心 + event + log | 数百 KB～1MB | 静态链接、strip |
+| + cJSON / mxml | +100～300KB | 不用 XML 可仍链入（或拆模块） |
+| + SQLite amalgamation | +500KB～1MB+ | `NV_ENABLE_SQLITE=OFF` |
+| + USB | 视 libusb | `NV_ENABLE_USB=OFF` |
+
 ---
 
 ## 目录结构
@@ -133,9 +158,17 @@ libnv/
 cmake -S . -B build -DNV_VERSION=1.0.0 -DCMAKE_BUILD_TYPE=Release
 cmake --build build -j$(nproc)
 
-# 运行守护进程（前台 + 指定配置）
-./build/bin/nvd -f -c etc/nv.conf
+# 运行守护进程（前台 + 指定配置；共享库需在 LD_LIBRARY_PATH 或 RPATH 中）
+LD_LIBRARY_PATH=build/lib ./build/bin/nvd -f -c etc/nv.conf
 ```
+
+`third_party/` 下各组件在 `build/lib/` 中单独产出静态库与动态库（`libnv` 通过链接依赖使用，不再把源码编入 `libnv`）：
+
+| 组件 | 静态库 | 动态库 |
+|------|--------|--------|
+| cJSON | `libcjson.a` | `libcjson.so` |
+| Mini-XML | `libmxml.a` | `libmxml.so` |
+| SQLite（`NV_ENABLE_SQLITE=ON`） | `libsqlite.a` | `libsqlite.so` |
 
 ### 常用 CMake 选项
 
@@ -148,12 +181,17 @@ cmake --build build -j$(nproc)
 | `NV_BUILD_EXAMPLES` | OFF | 示例程序 |
 | `NV_ENABLE_USB` | ON | USB 模块（需 libusb-1.0，否则自动排除） |
 | `NV_ENABLE_SQLITE` | ON | 内嵌 SQLite；OFF 时不编译 `nv_sqlite` |
+| `NV_EMBEDDED_PROFILE` | OFF | ON 时嵌入式预设（关 SQLite/USB、-Os） |
 
 ```bash
+# 嵌入式发行构建
+./build.sh 1.0.0 embedded
+
 cmake -S . -B build \
   -DNV_VERSION=1.0.0 \
   -DNV_BUILD_TESTS=ON \
-  -DNV_ENABLE_SQLITE=ON \
+  -DNV_EMBEDDED_PROFILE=ON \
+  -DNV_ENABLE_SQLITE=OFF \
   -DNV_ENABLE_USB=OFF
 cmake --build build -j$(nproc)
 ctest --test-dir build --output-on-failure
@@ -201,6 +239,7 @@ int main(int argc, char **argv)
         .on_business_cleanup = nv_core_business_cleanup,
         .on_idle             = NULL,
         .on_reload           = NULL,
+        .on_before_restart   = NULL,  /* OTA：SIGUSR1 前准备，返回非 NV_OK 取消 re-exec */
     };
     memset(&ctx, 0, sizeof(ctx));
     return nv_core_run(&ctx, argc, argv, &hooks) == NV_OK ? 0 : 1;

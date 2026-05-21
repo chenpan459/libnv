@@ -17,7 +17,8 @@ usage() {
     echo "  $0 <版本号> clean        清理 build 目录"
     echo "  $0 <版本号> rebuild      清理后重新编译"
     echo ""
-    echo -e "${YELLOW}环境变量:${NC} BUILD_DIR BUILD_TYPE NV_BUILD_EXAMPLES NV_BUILD_TESTS"
+    echo -e "${YELLOW}环境变量:${NC} BUILD_DIR BUILD_TYPE NV_BUILD_EXAMPLES NV_BUILD_TESTS NV_EMBEDDED_PROFILE"
+    echo "  $0 <版本号> embedded       # -DNV_EMBEDDED_PROFILE=ON -Os 预设"
     echo ""
     echo -e "${YELLOW}示例:${NC}"
     echo "  $0 1.2.3"
@@ -43,13 +44,22 @@ clean_code() {
 
 compile_code() {
     local version="$1"
-    echo -e "${CYAN}配置 CMake (${BUILD_TYPE}), 版本 ${version}...${NC}"
+    local profile="${2:-}"
+    local embedded_flag="OFF"
+
+    if [[ "${profile}" == "embedded" ]]; then
+        embedded_flag="ON"
+        BUILD_TYPE="${BUILD_TYPE:-Release}"
+    fi
+
+    echo -e "${CYAN}配置 CMake (${BUILD_TYPE}), 版本 ${version}, embedded=${embedded_flag}...${NC}"
     cmake -S . -B "${BUILD_DIR}" \
         -DCMAKE_BUILD_TYPE="${BUILD_TYPE}" \
         -DNV_VERSION="${version}" \
         -DNV_BUILD_APP=ON \
         -DNV_BUILD_EXAMPLES="${NV_BUILD_EXAMPLES:-OFF}" \
-        -DNV_BUILD_TESTS="${NV_BUILD_TESTS:-OFF}"
+        -DNV_BUILD_TESTS="${NV_BUILD_TESTS:-OFF}" \
+        -DNV_EMBEDDED_PROFILE="${embedded_flag}"
 
     echo -e "${CYAN}编译...${NC}"
     cmake --build "${BUILD_DIR}" -j"$(nproc 2>/dev/null || echo 4)"
@@ -65,6 +75,12 @@ fi
 
 NV_VERSION="${1:-}"
 ACTION="${2:-build}"
+PROFILE=""
+
+if [[ "${ACTION}" == "embedded" ]]; then
+    PROFILE="embedded"
+    ACTION="build"
+fi
 
 if ! validate_version "${NV_VERSION}"; then
     echo -e "${RED}错误: 必须指定有效版本号。${NC}" >&2
@@ -79,10 +95,10 @@ case "${ACTION}" in
         ;;
     rebuild)
         clean_code
-        compile_code "${NV_VERSION}"
+        compile_code "${NV_VERSION}" "${PROFILE}"
         ;;
     build|"")
-        compile_code "${NV_VERSION}"
+        compile_code "${NV_VERSION}" "${PROFILE}"
         ;;
     *)
         echo -e "${RED}未知操作: ${ACTION}${NC}" >&2

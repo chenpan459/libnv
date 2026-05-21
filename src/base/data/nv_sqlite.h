@@ -21,6 +21,9 @@ typedef struct sqlite3_stmt nv_sqlite_stmt_t;
 /** 打开数据库文件（不存在则创建） */
 int nv_sqlite_open(const char *path, nv_sqlite_t **db);
 
+/** 嵌入式友好打开：WAL + synchronous=NORMAL + 较小 cache */
+int nv_sqlite_open_embedded(const char *path, nv_sqlite_t **db);
+
 /** 内存数据库 */
 int nv_sqlite_open_memory(nv_sqlite_t **db);
 
